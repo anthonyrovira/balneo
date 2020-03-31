@@ -1,3 +1,9 @@
+/******************************************************/
+//       THIS IS A GENERATED FILE - DO NOT EDIT       //
+/******************************************************/
+
+#include "Particle.h"
+#line 1 "c:/Users/user/Documents/Particle/projects/balneo/src/balneo.ino"
 /*
  * Project Balneo
  * Description:
@@ -13,6 +19,18 @@
 #include <Wire.h>
 #include <oled-wing-adafruit.h>
 
+void setup();
+void loop();
+double arrondi(float data);
+double getTemperature();
+double getHumidity();
+int getCo2();
+void blinkLedTest();
+void displayTemp(float temp);
+void displayHr(float hr);
+void displayCo2(int ppm);
+void fadingLed(int Led1, int Led2, int Led3);
+#line 16 "c:/Users/user/Documents/Particle/projects/balneo/src/balneo.ino"
 #define redpin 2
 #define bluepin 4
 #define greenpin 5
@@ -173,30 +191,29 @@ void loop() {
     fadingLed(HIGH, LOW, HIGH);
   }
 }
-/*
 double arrondi(float data){
   return (double) ( (int) (data * pow(10, 2) + .5)) / pow(10, 2);
 }
-*/
+
 double getTemperature() {
   // Get Temperature
   float readings1 = dht.readTemperature();
-  //double result1 = arrondi(readings1);
-  if (isnan(readings1)) {
+  double result1 = arrondi(readings1);
+  if (isnan(result1)) {
     return -1;
   } else {
-    return readings1;
+    return result1;
   }
 }
 
 double getHumidity() {
   // Get Humidity
   float readings2 = dht.readHumidity();
-  //double result2 = arrondi(readings2);
-  if (isnan(readings2)) {
+  double result2 = arrondi(readings2);
+  if (isnan(result2)) {
     return -1;
   } else {
-    return readings2;
+    return result2;
   }
 }
 
