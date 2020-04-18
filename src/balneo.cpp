@@ -68,6 +68,10 @@ unsigned long currentMillis = 0;
 unsigned int interval = 30000;
 
 void setup() {
+  Particle.variable("temp", t);
+  Particle.variable("humidity", h);
+  Particle.variable("CO2", co2);
+  Particle.variable("presence", pirState);
   // Serial.begin(9600);
   pinMode(MOTOR_PIN, OUTPUT);
   pinMode(redpin, OUTPUT);
@@ -84,11 +88,6 @@ void setup() {
   display.display();
 
   dht.begin();
-
-  Particle.variable("temp", t);
-  Particle.variable("humidity", h);
-  Particle.variable("CO2", co2);
-  Particle.variable("presence", pirState);
 
   delay(100);
 
