@@ -50,6 +50,10 @@ unsigned long currentMillis = 0;
 unsigned int interval = 30000;
 
 void setup() {
+  Particle.variable("temp", t);
+  Particle.variable("humidity", h);
+  Particle.variable("CO2", co2);
+  Particle.variable("presence", pirState);
   // Serial.begin(9600);
   pinMode(MOTOR_PIN, OUTPUT);
   pinMode(redpin, OUTPUT);
@@ -57,20 +61,13 @@ void setup() {
   pinMode(greenpin, OUTPUT);
   pinMode(DHT22_PIN, INPUT);
   pinMode(PIR_PIN, INPUT_PULLUP);
-  // attachInterrupt(digitalPinToInterrupt(PIR_PIN), state, CHANGE);
 
   blinkLedTest();
-
   display.setup();
   display.clearDisplay();
   display.display();
 
   dht.begin();
-
-  Particle.variable("temp", t);
-  Particle.variable("humidity", h);
-  Particle.variable("CO2", co2);
-  Particle.variable("presence", pirState);
 
   delay(100);
 
@@ -98,39 +95,6 @@ void loop() {
         Particle.publish("newState", "dataError", PRIVATE);
       }
     } else {
-      if ((h <= 65) && (co2 <= 700)) {
-        analogWrite(MOTOR_PIN, MIN_SPEED);
-        stateIndicator = 1;
-        if (stateIndicator != lastState) {
-          Particle.publish("newState", "green", PRIVATE);
-        }
-        // Serial.println(F("Vitesse MIN"));
-        g_value = HIGH;
-        r_value = LOW;
-        b_value = LOW;
-      }
-      if (((h > 65) && (h <= 75)) || ((co2 > 700) && (co2 <= 1400))) {
-        analogWrite(MOTOR_PIN, INTER1_SPEED);
-        stateIndicator = 2;
-        if (stateIndicator != lastState) {
-          Particle.publish("newState", "lightBlue", PRIVATE);
-        }
-        // Serial.println(F("Vitesse 1"));
-        b_value = HIGH;
-        r_value = LOW;
-        g_value = HIGH;
-      }
-      if (((h > 75) && (h <= 85)) || ((co2 > 1400) && (co2 <= 2000))) {
-        analogWrite(MOTOR_PIN, INTER2_SPEED);
-        stateIndicator = 3;
-        if (stateIndicator != lastState) {
-          Particle.publish("newState", "blue", PRIVATE);
-        }
-        // Serial.println(F("Vitesse 2"));
-        r_value = LOW;
-        g_value = LOW;
-        b_value = HIGH;
-      }
       if ((h > 85) || (co2 > 2000)) {
         analogWrite(MOTOR_PIN, MAX_SPEED);
         stateIndicator = 4;
@@ -142,10 +106,42 @@ void loop() {
         g_value = LOW;
         b_value = LOW;
       }
+      else if (((h > 75) && (h <= 85)) || ((co2 > 1400) && (co2 <= 2000))) {
+        analogWrite(MOTOR_PIN, INTER2_SPEED);
+        stateIndicator = 3;
+        if (stateIndicator != lastState) {
+          Particle.publish("newState", "blue", PRIVATE);
+        }
+        // Serial.println(F("Vitesse 2"));
+        r_value = LOW;
+        g_value = LOW;
+        b_value = HIGH;
+      }
+      else if (((h > 65) && (h <= 75)) || ((co2 > 700) && (co2 <= 1400))) {
+        analogWrite(MOTOR_PIN, INTER1_SPEED);
+        stateIndicator = 2;
+        if (stateIndicator != lastState) {
+          Particle.publish("newState", "lightBlue", PRIVATE);
+        }
+        // Serial.println(F("Vitesse 1"));
+        b_value = HIGH;
+        r_value = LOW;
+        g_value = HIGH;
+      }
+      else if ((h <= 65) && (co2 <= 700)) {
+        analogWrite(MOTOR_PIN, MIN_SPEED);
+        stateIndicator = 1;
+        if (stateIndicator != lastState) {
+          Particle.publish("newState", "green", PRIVATE);
+        }
+        // Serial.println(F("Vitesse MIN"));
+        g_value = HIGH;
+        r_value = LOW;
+        b_value = LOW;
+      }
     }
     lastState = stateIndicator;
     previousMillis = currentMillis;
-    // attachInterrupt(digitalPinToInterrupt(PIR_PIN), state, CHANGE);
   }
   // pirValue = digitalRead(PIR_PIN);
   if (digitalRead(PIR_PIN) == HIGH) {
@@ -173,30 +169,30 @@ void loop() {
     fadingLed(HIGH, LOW, HIGH);
   }
 }
-/*
+
 double arrondi(float data){
   return (double) ( (int) (data * pow(10, 2) + .5)) / pow(10, 2);
 }
-*/
+
 double getTemperature() {
   // Get Temperature
   float readings1 = dht.readTemperature();
-  //double result1 = arrondi(readings1);
-  if (isnan(readings1)) {
+  double result1 = arrondi(readings1);
+  if (isnan(result1)) {
     return -1;
   } else {
-    return readings1;
+    return result1;
   }
 }
 
 double getHumidity() {
   // Get Humidity
   float readings2 = dht.readHumidity();
-  //double result2 = arrondi(readings2);
-  if (isnan(readings2)) {
+  double result2 = arrondi(readings2);
+  if (isnan(result2)) {
     return -1;
   } else {
-    return readings2;
+    return result2;
   }
 }
 
@@ -205,21 +201,6 @@ int getCo2() {
   int readings = mhz19b.Read();
   return readings;
 }
-/*
-void state() {
-  // -----||| PRESENCE DETECTION |||-----
-  if (pirValue == true) {
-    if (pirState == LOW) {
-      pirState = HIGH;
-    }
-  } else {
-    if (pirState == HIGH) {
-      pirState = LOW;
-    }
-  }
-  //detachInterrupt(digitalPinToInterrupt(PIR_PIN));
-}
-*/
 
 void blinkLedTest() {
   int ledState = LOW;
