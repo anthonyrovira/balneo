@@ -82,7 +82,6 @@ void setup() {
   // attachInterrupt(digitalPinToInterrupt(PIR_PIN), state, CHANGE);
 
   blinkLedTest();
-
   display.setup();
   display.clearDisplay();
   display.display();
@@ -190,6 +189,7 @@ void loop() {
     fadingLed(HIGH, LOW, HIGH);
   }
 }
+
 double arrondi(float data){
   return (double) ( (int) (data * pow(10, 2) + .5)) / pow(10, 2);
 }

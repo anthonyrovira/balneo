@@ -61,7 +61,6 @@ void setup() {
   pinMode(greenpin, OUTPUT);
   pinMode(DHT22_PIN, INPUT);
   pinMode(PIR_PIN, INPUT_PULLUP);
-  // attachInterrupt(digitalPinToInterrupt(PIR_PIN), state, CHANGE);
 
   blinkLedTest();
   display.setup();
@@ -96,39 +95,6 @@ void loop() {
         Particle.publish("newState", "dataError", PRIVATE);
       }
     } else {
-      if ((h <= 65) && (co2 <= 700)) {
-        analogWrite(MOTOR_PIN, MIN_SPEED);
-        stateIndicator = 1;
-        if (stateIndicator != lastState) {
-          Particle.publish("newState", "green", PRIVATE);
-        }
-        // Serial.println(F("Vitesse MIN"));
-        g_value = HIGH;
-        r_value = LOW;
-        b_value = LOW;
-      }
-      if (((h > 65) && (h <= 75)) || ((co2 > 700) && (co2 <= 1400))) {
-        analogWrite(MOTOR_PIN, INTER1_SPEED);
-        stateIndicator = 2;
-        if (stateIndicator != lastState) {
-          Particle.publish("newState", "lightBlue", PRIVATE);
-        }
-        // Serial.println(F("Vitesse 1"));
-        b_value = HIGH;
-        r_value = LOW;
-        g_value = HIGH;
-      }
-      if (((h > 75) && (h <= 85)) || ((co2 > 1400) && (co2 <= 2000))) {
-        analogWrite(MOTOR_PIN, INTER2_SPEED);
-        stateIndicator = 3;
-        if (stateIndicator != lastState) {
-          Particle.publish("newState", "blue", PRIVATE);
-        }
-        // Serial.println(F("Vitesse 2"));
-        r_value = LOW;
-        g_value = LOW;
-        b_value = HIGH;
-      }
       if ((h > 85) || (co2 > 2000)) {
         analogWrite(MOTOR_PIN, MAX_SPEED);
         stateIndicator = 4;
@@ -140,10 +106,42 @@ void loop() {
         g_value = LOW;
         b_value = LOW;
       }
+      else if (((h > 75) && (h <= 85)) || ((co2 > 1400) && (co2 <= 2000))) {
+        analogWrite(MOTOR_PIN, INTER2_SPEED);
+        stateIndicator = 3;
+        if (stateIndicator != lastState) {
+          Particle.publish("newState", "blue", PRIVATE);
+        }
+        // Serial.println(F("Vitesse 2"));
+        r_value = LOW;
+        g_value = LOW;
+        b_value = HIGH;
+      }
+      else if (((h > 65) && (h <= 75)) || ((co2 > 700) && (co2 <= 1400))) {
+        analogWrite(MOTOR_PIN, INTER1_SPEED);
+        stateIndicator = 2;
+        if (stateIndicator != lastState) {
+          Particle.publish("newState", "lightBlue", PRIVATE);
+        }
+        // Serial.println(F("Vitesse 1"));
+        b_value = HIGH;
+        r_value = LOW;
+        g_value = HIGH;
+      }
+      else if ((h <= 65) && (co2 <= 700)) {
+        analogWrite(MOTOR_PIN, MIN_SPEED);
+        stateIndicator = 1;
+        if (stateIndicator != lastState) {
+          Particle.publish("newState", "green", PRIVATE);
+        }
+        // Serial.println(F("Vitesse MIN"));
+        g_value = HIGH;
+        r_value = LOW;
+        b_value = LOW;
+      }
     }
     lastState = stateIndicator;
     previousMillis = currentMillis;
-    // attachInterrupt(digitalPinToInterrupt(PIR_PIN), state, CHANGE);
   }
   // pirValue = digitalRead(PIR_PIN);
   if (digitalRead(PIR_PIN) == HIGH) {
@@ -203,21 +201,6 @@ int getCo2() {
   int readings = mhz19b.Read();
   return readings;
 }
-/*
-void state() {
-  // -----||| PRESENCE DETECTION |||-----
-  if (pirValue == true) {
-    if (pirState == LOW) {
-      pirState = HIGH;
-    }
-  } else {
-    if (pirState == HIGH) {
-      pirState = LOW;
-    }
-  }
-  //detachInterrupt(digitalPinToInterrupt(PIR_PIN));
-}
-*/
 
 void blinkLedTest() {
   int ledState = LOW;
