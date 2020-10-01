@@ -4,5 +4,8 @@
   "particle.targetDevice": "photon_balneo",
   "particle.targetPlatform": "photon",
   "C_Cpp.errorSquiggles": "EnabledIfIncludesResolve",
-  "particle.firmwareVersion": "1.5.0"
+  "particle.firmwareVersion": "1.5.2",
+  "cSpell.enableFiletypes": [
+    "!cpp"
+  ]
 }

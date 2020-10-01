@@ -5,58 +5,36 @@
  * Date: 20/03/2020
  */
 
-#include <Adafruit_Sensor.h>
-#include <SPI.h>
-#include <Wire.h>
-#include <oled-wing-adafruit.h>
-#include "Pins.h"
-#include "Capteurs.h"
-#include "Variables.h"
+#include "pins.h"
+#include "capteurs.h"
+#include "variables.h"
 
-#define MOTOR_PIN 3
-#define MAX_SPEED 214
-#define MIN_SPEED 20
-#define INTER1_SPEED 95
-#define INTER2_SPEED 170
 //#define SCREEN_WIDTH 128 // OLED display width, in pixels
 //#define SCREEN_HEIGHT 32 // OLED display height, in pixels
 
-SYSTEM_THREAD(ENABLED);
+SYSTEM_MODE(MANUAL);    // Connexion automatique au particle cloud.
+SYSTEM_THREAD(ENABLED); // Multi thread entre la gestion de la connexion et le programme principal
 
-OledWingAdafruit display;
+Capteurs capteurs; // --------- création de la variable structure qui héberge les données des capteurs et leurs méthodes associées.
+Ihm ihm;           // --------- création de la variable Ihm qui héberge la structure d'affichage et ses méthodes associées.
 
-PietteTech_DHT dht(DHT22_PIN, DHT22);
-
-MHZ19BCO2SensorSerial<USARTSerial> mhz19b(Serial1);
-
-double h = 0.0;
-double t = 0.0;
-int co2 = 0;
-int motorState = 0;
-int pirState = LOW;
-bool pirValue = false;
+// int motorState = 0;
+int presence = LOW;
+// bool pirValue = false;
 byte stateIndicator;
 byte lastState = 10;
-int r_value = HIGH;
-int g_value = HIGH;
-int b_value = HIGH;
+
 unsigned long previousMillis = 0;
 unsigned long currentMillis = 0;
-unsigned int interval = 30000;
 
 void setup()
 {
   Particle.variable("temp", t);
   Particle.variable("humidity", h);
   Particle.variable("CO2", co2);
-  Particle.variable("presence", pirState);
-  // Serial.begin(9600);
-  pinMode(MOTOR_PIN, OUTPUT);
-  pinMode(redpin, OUTPUT);
-  pinMode(bluepin, OUTPUT);
-  pinMode(greenpin, OUTPUT);
-  pinMode(DHT22_PIN, INPUT);
-  pinMode(PIR_PIN, INPUT_PULLUP);
+  Particle.variable("presence", presence);
+
+  capteurs.begin();
 
   blinkLedTest();
   display.setup();
@@ -78,10 +56,10 @@ void setup()
 void loop()
 {
   currentMillis = millis();
-  if (currentMillis - previousMillis >= interval)
+  if (currentMillis - previousMillis >= TEMPO_MAJ_30SEC)
   {
     /* -----||| GETTING DATA FROM SENSORS |||----- */
-    t = getTemperature();
+    t = capteurs.getTemperature();
     h = getHumidity();
     co2 = getCo2();
 
@@ -156,13 +134,13 @@ void loop()
   // pirValue = digitalRead(PIR_PIN);
   if (digitalRead(PIR_PIN) == HIGH)
   {
-    digitalWrite(redpin, r_value);
-    digitalWrite(greenpin, g_value);
-    digitalWrite(bluepin, b_value);
+    digitalWrite(REDPIN, r_value);
+    digitalWrite(GREENPIN, g_value);
+    digitalWrite(BLUEPIN, b_value);
 
-    if (pirState == LOW)
+    if (presence == LOW)
     {
-      pirState = HIGH;
+      presence = HIGH;
       Particle.publish("Motion-Detection", "presence", PRIVATE);
     }
     displayTemp((float)t);
@@ -174,9 +152,9 @@ void loop()
     display.clearDisplay();
     display.display();
 
-    if (pirState == HIGH)
+    if (presence == HIGH)
     {
-      pirState = LOW;
+      presence = LOW;
       Particle.publish("Motion-Detection", "absence", PRIVATE);
     }
     fadingLed(HIGH, HIGH, HIGH);
@@ -184,7 +162,7 @@ void loop()
     fadingLed(HIGH, LOW, HIGH);
   }
 }
-
+/*
 double arrondi(float data)
 {
   return (double)((int)(data * pow(10, 2) + .5)) / pow(10, 2);
@@ -203,9 +181,9 @@ double getTemperature()
   {
     return result;
   }
-}
+}*/
 
-double getHumidity()
+/*double getHumidity()
 {
   // Get Humidity
   float readings = dht.readHumidity();
@@ -246,14 +224,14 @@ void blinkLedTest()
       {
         ledState = LOW;
       }
-      digitalWrite(redpin, ledState);
-      digitalWrite(greenpin, ledState);
-      digitalWrite(bluepin, ledState);
+      digitalWrite(REDPIN, ledState);
+      digitalWrite(GREENPIN, ledState);
+      digitalWrite(BLUEPIN, ledState);
       coutdown--;
     }
   }
 }
-
+*/
 void displayTemp(float temp)
 {
   int currentTime = 0;
@@ -325,7 +303,7 @@ void displayCo2(int ppm)
     currentTime = millis();
   }
 }
-
+/*
 void fadingLed(int Led1, int Led2, int Led3)
 {
   int i;
@@ -341,27 +319,27 @@ void fadingLed(int Led1, int Led2, int Led3)
     if (Led1 == HIGH)
     {
       i1 = i;
-      analogWrite(redpin, i1);
+      analogWrite(REDPIN, i1);
     }
     else
     {
-      digitalWrite(redpin, LOW);
+      digitalWrite(REDPIN, LOW);
     }
     if (Led2 == HIGH)
     {
-      digitalWrite(bluepin, HIGH);
+      digitalWrite(BLUEPIN, HIGH);
     }
     else
     {
-      digitalWrite(bluepin, LOW);
+      digitalWrite(BLUEPIN, LOW);
     }
     if (Led3 == HIGH)
     {
-      digitalWrite(greenpin, HIGH);
+      digitalWrite(GREENPIN, HIGH);
     }
     else
     {
-      digitalWrite(greenpin, LOW);
+      digitalWrite(GREENPIN, LOW);
     }
     prevTime = millis();
     while (currentTime - prevTime < twentymillis)
@@ -375,27 +353,27 @@ void fadingLed(int Led1, int Led2, int Led3)
     if (Led1 == HIGH)
     {
       i1 = i;
-      analogWrite(redpin, i1);
+      analogWrite(REDPIN, i1);
     }
     else
     {
-      digitalWrite(redpin, LOW);
+      digitalWrite(REDPIN, LOW);
     }
     if (Led2 == HIGH)
     {
-      digitalWrite(bluepin, HIGH);
+      digitalWrite(BLUEPIN, HIGH);
     }
     else
     {
-      digitalWrite(bluepin, LOW);
+      digitalWrite(BLUEPIN, LOW);
     }
     if (Led3 == HIGH)
     {
-      digitalWrite(greenpin, HIGH);
+      digitalWrite(GREENPIN, HIGH);
     }
     else
     {
-      digitalWrite(greenpin, LOW);
+      digitalWrite(GREENPIN, LOW);
     }
     prevTime = millis();
     while (currentTime - prevTime < twentymillis)
@@ -404,3 +382,4 @@ void fadingLed(int Led1, int Led2, int Led3)
     }
   }
 }
+*/
