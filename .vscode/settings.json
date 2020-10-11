@@ -6,6 +6,8 @@
   "C_Cpp.errorSquiggles": "EnabledIfIncludesResolve",
   "particle.firmwareVersion": "1.5.2",
   "cSpell.enableFiletypes": [
-    "!cpp"
+    "!cpp",
+    "!markdown",
+    "!plaintext"
   ]
 }

@@ -1,0 +1,23 @@
+## Notes de versions
+
+`v2.0` : Object-oriented version
+
+    - Création de classes et d'objets pour organiser la structure du code
+    - Intégration d'un véritable workflow géré via un `switch` dans la boucle principale.
+    - Données remontées sur le cloud particle : Température, Humidité, CO2, Présence, Compteur de présence.
+    - Fonctions accessible sur le cloud particle : Reset.
+
+`v1.0` : Noob version
+
+    - Un seul fichier main `.ino`
+    - Bug d'affichage sur l'écran OLED lors d'une Présence
+
+
+## A faire / A finir
+
+    - Gestion de la remise à zéro du compteur de présence.   => OK 11/10/20
+    - Afficher les valeurs de capteurs sur l'écran lors d'une présence
+    - Gérer la tempo des `fadingLed` fonctions
+    - Calcul des temps de présence/absense dans la pièce
+    - Fonction de retour de qualité d'air (humidité et co2)
+    - Test du code

@@ -17,8 +17,9 @@ bool Capteurs::begin()
     pinMode(MOTOR_PIN, OUTPUT);
     pinMode(DHT22_PIN, INPUT);
     pinMode(PIR_PIN, INPUT_PULLDOWN);
+    attachInterrupt(PIR_PIN, newPresence, RISING);
 
-    delay(50);
+    delay(100);
 
     dht.begin();
     return state;
@@ -73,10 +74,31 @@ int Capteurs::getCo2()
     }
 }
 
-int Capteurs::getPresence()
+void Capteurs::newPresence()
+{
+    capteurs.donnees.presence = HIGH;
+}
+
+bool Capteurs::getPresence()
 {
     donnees.presence = digitalRead(PIR_PIN);
+    /*
+    if (donnees.presence != donnees.lastPresence)
+    {
+        if (donnees.presence == HIGH)
+        {
+            dernierePresence = millis();
+            counterNbPresence();
+        }
+    }
+    donneees.lastPresence = donnees.presence;
+    */
     return donnees.presence;
+}
+
+int Capteurs::counterNbPresence()
+{
+    return donnees.nbPresence++;
 }
 
 // Remise à zéro du compteur de nombre de fronts montant du détecteur de présence
@@ -85,138 +107,93 @@ void Capteurs::RAZNbPresence()
     donnees.nbPresence = 0;
 }
 
-void Capteurs::redLight(int r_value)
+// Mise à jour de tous les capteurs
+bool Capteurs::MAJCapteurs()
 {
-    digitalWrite(REDPIN, r_value);
+    bool isOk = true;
+    getTemperature();
+    getHumidity();
+    getCo2();
 
-    if (r_value != 0)
+    if (donnees.temperature == -1 || donnees.humidity == -1 || donnees.co2 == -1)
     {
-        donnees.etat_LED = 1;
+        isOk = false;
+    }
+
+    if (getPresence())
+    {
+        capteurs.donnees.presence = HIGH;
     }
     else
-        donnees.etat_LED = 0;
+        capteurs.donnees.presence = LOW;
+
+    return isOk;
 }
 
-void Capteurs::greenLight(int g_value)
+void Capteurs::evaluateAirQuality()
 {
-    digitalWrite(GREENPIN, g_value);
-
-    if (g_value != 0)
+    if (donnees.temperature <= 0 || donnees.humidity <= 0 || donnees.co2 <= 0)
     {
-        donnees.etat_LED = 1;
+        donnees.indiceQAI = QAI_error;
+        if (lastIndiceQAI != donnees.indiceQAI)
+        {
+            Particle.publish("error", "Invalid data from sensors", PRIVATE);
+            dernierChgtQAI = millis();
+        }
+        donnees.r_value = HIGH;
+        donnees.g_value = LOW;
+        donnees.b_value = HIGH;
     }
     else
-        donnees.etat_LED = 0;
-}
-
-void Capteurs::blueLight(int b_value)
-{
-    digitalWrite(BLUEPIN, b_value);
-
-    if (b_value != 0)
     {
-        donnees.etat_LED = 1;
-    }
-    else
-        donnees.etat_LED = 0;
-}
-
-void Capteurs::rgbLight(int r_value, int g_value, int b_value)
-{
-    digitalWrite(REDPIN, r_value);
-    digitalWrite(GREENPIN, g_value);
-    digitalWrite(BLUEPIN, b_value);
-
-    if (r_value != 0 && g_value != 0 && b_value != 0)
-    {
-        donnees.etat_LED = 1;
-    }
-    else
-        donnees.etat_LED = 0;
-}
-
-void Capteurs::blinkLED(int nb, int loopTime)
-{
-    int ledState = LOW;
-    unsigned long previousMillis = 0;
-    unsigned long currentMillis = 0;
-    for (int i = 0; i < nb * 2; i++)
-    {
-        currentMillis = millis();
-        if (currentMillis - previousMillis >= loopTime)
+        if ((donnees.humidity > 85) || (donnees.co2 > 2000))
         {
-            previousMillis = currentMillis;
-            donnees.etat_LED = !donnees.etat_LED;
-            ledState = !ledState;
-            rgbLight(ledState, ledState, ledState);
+            donnees.indiceQAI = QAI_rouge;
+            if (lastIndiceQAI != donnees.indiceQAI)
+            {
+                Particle.publish("newState", "red", PRIVATE);
+                dernierChgtQAI = millis();
+            }
+            donnees.r_value = HIGH;
+            donnees.g_value = LOW;
+            donnees.b_value = LOW;
         }
-    }
-}
-
-void Capteurs::fadingLed(int redLed, int greenLed, int blueLed)
-{
-    int i;
-    int ledValue;
-    int currentTime = 0;
-    int prevTime;
-    int twentymillis = 20;
-
-    for (i = 0; i < 255; i += 5)
-    {
-        if (redLed == HIGH)
+        else if (((h > 65) && (h <= 75)) || ((co2 > 700) && (co2 <= 1400)))
         {
-            ledValue = i;
-            redLight(ledValue);
+            donnees.indiceQAI = QAI_bleuFonce;
+            if (lastIndiceQAI != donnees.indiceQAI)
+            {
+                Particle.publish("newState", "blue", PRIVATE);
+                dernierChgtQAI = millis();
+            }
+            donnees.r_value = LOW;
+            donnees.g_value = LOW;
+            donnees.b_value = HIGH;
         }
-        else
-            redLight(LOW);
-        if (greenLed == HIGH)
+        else if (((h > 65) && (h <= 75)) || ((co2 > 700) && (co2 <= 1400)))
         {
-            blueLight(HIGH);
+            donnees.indiceQAI = QAI_bleuClair;
+            if (lastIndiceQAI != donnees.indiceQAI)
+            {
+                Particle.publish("newState", "lightBlue", PRIVATE);
+                dernierChgtQAI = millis();
+            }
+            donnees.r_value = LOW;
+            donnees.g_value = HIGH;
+            donnees.b_value = HIGH;
         }
-        else
-            blueLight(LOW);
-
-        if (blueLed == HIGH)
+        else if ((h <= 65) && (co2 <= 700))
         {
-            greenLight(HIGH);
-        }
-        else
-            greenLight(LOW);
-
-        prevTime = millis();
-        while (currentTime - prevTime < twentymillis)
-        {
-            currentTime = millis();
+            donnees.indiceQAI = QAI_vert;
+            if (lastIndiceQAI != donnees.indiceQAI)
+            {
+                Particle.publish("newState", "green", PRIVATE);
+                dernierChgtQAI = millis();
+            }
+            donnees.r_value = LOW;
+            donnees.g_value = HIGH;
+            donnees.b_value = LOW;
         }
     }
-    currentTime = 0;
-    for (i = 255; i > 0; i -= 5)
-    {
-        if (redLed == HIGH)
-        {
-            ledValue = i;
-            redLight(ledValue);
-        }
-        else
-            redLight(LOW);
-
-        if (greenLed == HIGH)
-        {
-            blueLight(HIGH);
-        }
-        else
-            blueLight(LOW);
-        if (blueLed == HIGH)
-        {
-            greenLight(HIGH);
-        }
-        else
-            greenLight(LOW);
-        prevTime = millis();
-        while (currentTime - prevTime < twentymillis)
-        {
-            currentTime = millis();
-        }
-    }
+    lastIndiceQAI = donnees.indiceQAI;
 }
