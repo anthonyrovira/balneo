@@ -54,3 +54,14 @@ ATtiny85    |            |      X     |          |
   * ATtiny85 : Adafruit Gemma, Arduino Gemma, Adafruit Trinket
 
 <!-- END COMPATIBILITY TABLE -->
+
+# Version History
+
+### 1.3.2 (2020-09-02)
+
+- Upgrade to Adafruit_GFX_RK 1.5.8
+
+### 1.3.1 (2020-05-04)
+
+- Fix compiler error for undefined conversion to SpiClass with 1.5.1-rc.1.
+- Upgrade to Adafruit_GFX_RK 1.5.7

@@ -1,6 +1,16 @@
 ## Notes de versions
 
-`v2.0` : Object-oriented version
+`v2.1` : Mise à jour majeure => 20/12/2020
+
+    - Revue globale du code et corrections de bugs mineurs
+    - Création de la structure Timing.h pour la gestion des données de temporisations
+    - Afficher les valeurs de capteurs sur l'écran lors d'une présence
+    - Gérer la tempo des fonctions `fadingLed`
+    - Gestion de la remise à zéro du compteur de présence.
+    - Calcul des temps de présence dans la pièce
+    - Calcul des temps pour chaque changement d'état de la QAI dans la pièce
+
+`v2.0` : Step up in progress version
 
     - Création de classes et d'objets pour organiser la structure du code
     - Intégration d'un véritable workflow géré via un `switch` dans la boucle principale.
@@ -15,9 +25,8 @@
 
 ## A faire / A finir
 
-    - Gestion de la remise à zéro du compteur de présence.   => OK 11/10/20
-    - Afficher les valeurs de capteurs sur l'écran lors d'une présence
-    - Gérer la tempo des `fadingLed` fonctions
-    - Calcul des temps de présence/absense dans la pièce
+    - Stocker les data dans influxdb via les API Particle
+    - Réceptionner et mettre en forme les data sur un dashboard
     - Fonction de retour de qualité d'air (humidité et co2)
+    - Fonction pour effectuer une dérogation sur la ventilation
     - Test du code

@@ -3,7 +3,7 @@
 /******************************************************/
 
 #include "Particle.h"
-#line 1 "c:/Users/user/Documents/Particle/projects/balneo/src/balneo.ino"
+#line 1 "d:/antho/Documents/Programmation/Particle/balneo/src/balneo.ino"
 /*
  * Project Balneo
  * Description:
@@ -11,414 +11,269 @@
  * Date: 20/03/2020
  */
 
-#include <Adafruit_Sensor.h>
-#include <SPI.h>
-#include <Wire.h>
-#include <oled-wing-adafruit.h>
 #include "Pins.h"
 #include "Capteurs.h"
 #include "Variables.h"
+#include "Actionneurs.h"
+#include "Timing.h"
 
-void setup();
-void loop();
-double arrondi(float data);
-double getTemperature();
-double getHumidity();
-int getCo2();
-void blinkLedTest();
-void displayTemp(float temp);
-void displayHr(float hr);
-void displayCo2(int ppm);
-void fadingLed(int Led1, int Led2, int Led3);
-#line 16 "c:/Users/user/Documents/Particle/projects/balneo/src/balneo.ino"
-#define MOTOR_PIN 3
-#define MAX_SPEED 214
-#define MIN_SPEED 20
-#define INTER1_SPEED 95
-#define INTER2_SPEED 170
 //#define SCREEN_WIDTH 128 // OLED display width, in pixels
 //#define SCREEN_HEIGHT 32 // OLED display height, in pixels
 
-SYSTEM_THREAD(ENABLED);
+void setup();
+void loop();
+int cloud_reset(String command);
+int state_QAI(String command);
+bool particleConnect();
+bool particleProcess();
+#line 17 "d:/antho/Documents/Programmation/Particle/balneo/src/balneo.ino"
+SYSTEM_MODE(MANUAL);    // Connexion automatique au particle cloud.
+SYSTEM_THREAD(ENABLED); // Multi thread entre la gestion de la connexion et le programme principal
 
-OledWingAdafruit display;
+Capteurs capteurs;       // --------- création de la variable structure qui héberge les données des capteurs et leurs méthodes associées.
+Actionneurs actionneurs; // --------- création de la variable Actionneurs qui héberge la structure d'affichage et ses méthodes associées.
+Timing timing;           // --------- Création de la variable timer pour gérer les variables temporelles
 
-PietteTech_DHT dht(DHT22_PIN, DHT22);
+// --------- Initialisation de la machine d'état du capteur --------
+enum Etat
+{
+  IDLE = 0,         // Attente de la prochaine action à mener
+  INIT = 1,         // Initialisation du système
+  ACQUISITION = 2,  // Acquisition des données capteurs
+  PROCESS = 3,      // Analyse et prise de décisions
+  COMMANDE = 4,     // Commande de la led rgb et du moteur
+  PUBLISH = 5,      // Publication des données vers l'exterieur
+  OLED_DISPLAY = 6, // Gestion de l'affichage sur l'écran OLED
+  RECONNECT = 7,    // Gestion de la reconnexion en cas de perte de connexion
+  SYSTEM_RESET = 10 // Gestion de la rénitialisation du système
+};
 
-MHZ19BCO2SensorSerial<USARTSerial> mhz19b(Serial1);
+Etat etat = INIT;
 
-double h = 0.0;
-double t = 0.0;
-int co2 = 0;
-int motorState = 0;
-int pirState = LOW;
-bool pirValue = false;
+// --------- Variables globales ----------
+// int motorState = 0;
+double _humidity = -1.0;
+double _temperature = -1.0;
+int _co2 = -1;
+int _presence = -1;
+int _nbPresence = -1;
+int _dureePresence = -1;
+int _dureeChgtQAI = -1;
+// bool pirValue = false;
 byte stateIndicator;
 byte lastState = 10;
-int r_value = HIGH;
-int g_value = HIGH;
-int b_value = HIGH;
-unsigned long previousMillis = 0;
-unsigned long currentMillis = 0;
-unsigned int interval = 30000;
 
 void setup()
 {
-  Particle.variable("temp", t);
-  Particle.variable("humidity", h);
-  Particle.variable("CO2", co2);
-  Particle.variable("presence", pirState);
-  // Serial.begin(9600);
-  pinMode(MOTOR_PIN, OUTPUT);
-  pinMode(redpin, OUTPUT);
-  pinMode(bluepin, OUTPUT);
-  pinMode(greenpin, OUTPUT);
-  pinMode(DHT22_PIN, INPUT);
-  pinMode(PIR_PIN, INPUT_PULLUP);
+  /* Variables Particle cloud */
+  Particle.variable("temperature", _temperature);
+  Particle.variable("humidity", _humidity);
+  Particle.variable("co2", _co2);
+  Particle.variable("presence", _presence);
+  Particle.variable("NbPresence", _nbPresence);
+  Particle.variable("dureePresence", _dureePresence);
+  Particle.variable("dureeChgtQAI", _dureeChgtQAI);
 
-  blinkLedTest();
-  display.setup();
-  display.clearDisplay();
-  display.display();
+  /* Fonctions Particle cloud */
+  Particle.function("Reset", cloud_reset);
+  Particle.function("QAI", state_QAI);
 
-  dht.begin();
+  particleConnect();
 
-  delay(100);
+  Particle.publish("info", "Balneo version " + String(VERSION), PRIVATE);
 
-  t = getTemperature();
-  h = getHumidity();
-  co2 = getCo2();
+  capteurs.begin();        // initialisation des capteurs
+  capteurs.donnees.init(); // initialisation des donnees des capteurs
 
-  delay(1000);
-  previousMillis = millis();
+  actionneurs.begin();                     // initialisation des actionneurs
+  actionneurs.blinkLED(5, TEMPO_MAJ_1SEC); // Clignotement de LED pour vérifier que les actionneurs fonctionnent
+
+  Particle.publish("info", "Setup completed", PRIVATE);
 }
 
 void loop()
 {
-  currentMillis = millis();
-  if (currentMillis - previousMillis >= interval)
+  switch (etat)
   {
-    /* -----||| GETTING DATA FROM SENSORS |||----- */
-    t = getTemperature();
-    h = getHumidity();
-    co2 = getCo2();
-
-    if (co2 < 0 || t < 0 || h < 0)
+  case IDLE:
+    if (!capteurs.donnees.etat_connexion)
     {
-      g_value = LOW;
-      r_value, b_value = HIGH;
-      stateIndicator = 0;
-      if (stateIndicator != lastState)
-      {
-        Particle.publish("newState", "dataError", PRIVATE);
-      }
+      etat = RECONNECT;
+    }
+
+    if (millis() - timing.derniereMAJ_5SEC >= TEMPO_MAJ_5SEC)
+    {
+      capteurs.donnees.etat_connexion = particleProcess();
+      timing.derniereMAJ_5SEC = millis();
+    }
+
+    if (millis() - timing.derniereMAJ_30SEC >= TEMPO_MAJ_30SEC)
+    {
+      etat = ACQUISITION;
+      timing.derniereMAJ_30SEC = millis();
+    }
+
+    if (millis() - timing.derniereMAJ_24H >= TEMPO_MAJ_24H)
+    {
+      capteurs.RAZNbPresence();
+    }
+
+    if (capteurs.processPresence())
+    {
+      actionneurs.processLED();
+      actionneurs.displayTemp(capteurs.donnees.temperature);
+      actionneurs.displayHr(capteurs.donnees.humidity);
+      actionneurs.displayCo2(capteurs.donnees.co2);
     }
     else
     {
-      if ((h > 85) || (co2 > 2000))
-      {
-        analogWrite(MOTOR_PIN, MAX_SPEED);
-        stateIndicator = 4;
-        if (stateIndicator != lastState)
-        {
-          Particle.publish("newState", "red", PRIVATE);
-        }
-        // Serial.println(F("Vitesse MAX"));
-        r_value = HIGH;
-        g_value = LOW;
-        b_value = LOW;
-      }
-      else if (((h > 75) && (h <= 85)) || ((co2 > 1400) && (co2 <= 2000)))
-      {
-        analogWrite(MOTOR_PIN, INTER2_SPEED);
-        stateIndicator = 3;
-        if (stateIndicator != lastState)
-        {
-          Particle.publish("newState", "blue", PRIVATE);
-        }
-        // Serial.println(F("Vitesse 2"));
-        r_value = LOW;
-        g_value = LOW;
-        b_value = HIGH;
-      }
-      else if (((h > 65) && (h <= 75)) || ((co2 > 700) && (co2 <= 1400)))
-      {
-        analogWrite(MOTOR_PIN, INTER1_SPEED);
-        stateIndicator = 2;
-        if (stateIndicator != lastState)
-        {
-          Particle.publish("newState", "lightBlue", PRIVATE);
-        }
-        // Serial.println(F("Vitesse 1"));
-        b_value = HIGH;
-        r_value = LOW;
-        g_value = HIGH;
-      }
-      else if ((h <= 65) && (co2 <= 700))
-      {
-        analogWrite(MOTOR_PIN, MIN_SPEED);
-        stateIndicator = 1;
-        if (stateIndicator != lastState)
-        {
-          Particle.publish("newState", "green", PRIVATE);
-        }
-        // Serial.println(F("Vitesse MIN"));
-        g_value = HIGH;
-        r_value = LOW;
-        b_value = LOW;
-      }
+      actionneurs.fadingLed(HIGH, HIGH, HIGH);
+      actionneurs.fadingLed(HIGH, HIGH, LOW);
+      actionneurs.fadingLed(HIGH, LOW, HIGH);
     }
-    lastState = stateIndicator;
-    previousMillis = currentMillis;
-  }
-  // pirValue = digitalRead(PIR_PIN);
-  if (digitalRead(PIR_PIN) == HIGH)
-  {
-    digitalWrite(redpin, r_value);
-    digitalWrite(greenpin, g_value);
-    digitalWrite(bluepin, b_value);
 
-    if (pirState == LOW)
+    break;
+
+  //**************************************************
+  case INIT:
+    if (!capteurs.donnees.etat_connexion)
     {
-      pirState = HIGH;
-      Particle.publish("Motion-Detection", "presence", PRIVATE);
+      etat = RECONNECT;
     }
-    displayTemp((float)t);
-    displayHr((float)h);
-    displayCo2((int)co2);
+    timing.init();
+    capteurs.MAJCapteurs();
+    actionneurs.blinkLED(5, 300);
+
+    Particle.publish("info", "Init completed", PRIVATE);
+    etat = IDLE;
+    break;
+
+  //**************************************************
+  case ACQUISITION:
+    if (!capteurs.MAJCapteurs())
+    {
+      Particle.publish("error", "Invalid data from sensors", PRIVATE);
+    }
+    etat = PROCESS;
+    break;
+
+  //**************************************************
+  case PROCESS:
+    capteurs.evaluateAirQuality();
+    capteurs.processPresence();
+
+    etat = COMMANDE;
+    break;
+
+  //**************************************************
+  case COMMANDE:
+    actionneurs.processMotor();
+
+    etat = PUBLISH;
+    break;
+
+  //**************************************************
+  case PUBLISH:
+    _humidity = (double)capteurs.donnees.humidity;
+    _temperature = (double)capteurs.donnees.temperature;
+    _co2 = capteurs.donnees.co2;
+    _presence = capteurs.donnees.presence;
+    _nbPresence = capteurs.donnees.nbPresence;
+    _dureePresence = (int)timing.dureePresence;
+    _dureeChgtQAI = (int)timing.dureeChgtQAI;
+
+    etat = IDLE;
+    break;
+
+  //**************************************************
+  case OLED_DISPLAY:
+    /* code */
+    break;
+
+  //**************************************************
+  case RECONNECT:
+
+    capteurs.donnees.etat_connexion = particleConnect();
+    capteurs.donnees.etat_connexion ? Particle.publish("reconnect", "connection is back", PRIVATE) : Particle.publish("reconnect", "reconnection failed", PRIVATE);
+
+    etat = IDLE;
+    break;
+
+  //**************************************************
+  case SYSTEM_RESET:
+    Particle.publish("reset", "Reset processing...", PRIVATE);
+    timing.waitingLoop(2000);
+    System.reset();
+    break;
+
+  //**************************************************
+  default:
+    etat = INIT;
+    break;
+  }
+}
+
+//  Reset depuis le cloud
+int cloud_reset(String command)
+{ // Fonction de callback de la Particle.function() reset : reset du système.
+  // look for the matching argument "reset" <-- max of 64 characters long
+  if (command.toLowerCase() == "reset" || command == "1" || command.toLowerCase() == "ok")
+  {
+    etat = SYSTEM_RESET;
+  }
+}
+
+// Pour obtenir l'indice de QAI actuel
+int state_QAI(String command)
+{
+  if (command == "" || command == "1" || command.toLowerCase() == "ok")
+  {
+    /*
+    int res=0;
+    if (capteurs.donnees.indiceQAI == QAI_error)
+    {
+      res = 0;
+    }
+    else if (capteurs.donnees.indiceQAI == QAI_vert)
+    {
+      res = 1;
+    }
+    */
+
+    return capteurs.donnees.indiceQAI;
+  }
+}
+
+// Procédure de connexion au cloud Particle
+bool particleConnect()
+{
+  if (!Particle.connected())
+  {
+    do
+    {
+      Particle.connect();
+      timing.timeoutConnexion = millis();
+    } while (!Particle.connected() || (millis() - timing.timeoutConnexion) >= TEMPO_MAJ_15SEC);
+  }
+  if (Particle.connected())
+  {
+    return true;
   }
   else
   {
-    display.clearDisplay();
-    display.display();
-
-    if (pirState == HIGH)
-    {
-      pirState = LOW;
-      Particle.publish("Motion-Detection", "absence", PRIVATE);
-    }
-    fadingLed(HIGH, HIGH, HIGH);
-    fadingLed(HIGH, HIGH, LOW);
-    fadingLed(HIGH, LOW, HIGH);
+    return false;
   }
 }
 
-double arrondi(float data)
+bool particleProcess()
 {
-  return (double)((int)(data * pow(10, 2) + .5)) / pow(10, 2);
-}
-
-double getTemperature()
-{
-  // Get Temperature
-  float readings = dht.readTemperature();
-  double result = arrondi(readings);
-  if (isnan(result))
+  if (capteurs.donnees.etat_connexion)
   {
-    return -1;
+    Particle.process();
+    return true;
   }
   else
   {
-    return result;
-  }
-}
-
-double getHumidity()
-{
-  // Get Humidity
-  float readings = dht.readHumidity();
-  double result = arrondi(readings);
-  if (isnan(result))
-  {
-    return -1;
-  }
-  else
-  {
-    return result;
-  }
-}
-
-int getCo2()
-{
-  //Get CO2
-  int readings = mhz19b.Read();
-  return readings;
-}
-
-void blinkLedTest()
-{
-  int ledState = LOW;
-  int coutdown = 20;
-  int prevMillis = 0;
-  while (coutdown != 0)
-  {
-    int curMillis = millis();
-    if (curMillis - prevMillis >= 500)
-    {
-      prevMillis = curMillis;
-      if (ledState == LOW)
-      {
-        ledState = HIGH;
-      }
-      else
-      {
-        ledState = LOW;
-      }
-      digitalWrite(redpin, ledState);
-      digitalWrite(greenpin, ledState);
-      digitalWrite(bluepin, ledState);
-      coutdown--;
-    }
-  }
-}
-
-void displayTemp(float temp)
-{
-  int currentTime = 0;
-  int prevTime;
-  int tensecs = 10000;
-  display.clearDisplay();
-
-  display.setTextSize(1);
-  display.setTextColor(WHITE);
-  display.setCursor(0, 0);
-  display.println(F("Temperature : "));
-  display.setTextSize(3);
-  display.print(temp);
-  display.println(F(" C"));
-  display.display();
-  prevTime = millis();
-  while (currentTime - prevTime < tensecs)
-  {
-    currentTime = millis();
-  }
-}
-
-void displayHr(float hr)
-{
-  int currentTime = 0;
-  int prevTime;
-  int tensecs = 10000;
-  display.clearDisplay();
-
-  display.setTextSize(1);
-  display.setTextColor(WHITE);
-  display.setCursor(0, 0);
-  display.println(F("Humidite : "));
-  display.setTextSize(3);
-  display.print(hr);
-
-  display.drawLine(display.width() - 20, display.height(), display.width(),
-                   display.height() - 20, WHITE);
-
-  display.drawCircle(display.width() - 16, display.height() - 16, 3, WHITE);
-
-  display.drawCircle(display.width() - 4, display.height() - 4, 3, WHITE);
-  display.display();
-  prevTime = millis();
-  while (currentTime - prevTime < tensecs)
-  {
-    currentTime = millis();
-  }
-}
-
-void displayCo2(int ppm)
-{
-  int currentTime = 0;
-  int prevTime;
-  int tensecs = 10000;
-  display.clearDisplay();
-
-  display.setTextSize(1);
-  display.setTextColor(WHITE);
-  display.setCursor(0, 0);
-  display.println(F("CO2 : "));
-  display.setTextSize(3);
-  display.print(ppm);
-  display.println(F("ppm"));
-  display.display();
-  prevTime = millis();
-  while (currentTime - prevTime < tensecs)
-  {
-    currentTime = millis();
-  }
-}
-
-void fadingLed(int Led1, int Led2, int Led3)
-{
-  int i;
-  int i1;
-  int i2;
-  int i3;
-  int currentTime = 0;
-  int prevTime;
-  int twentymillis = 20;
-
-  for (i = 0; i < 255; i += 5)
-  {
-    if (Led1 == HIGH)
-    {
-      i1 = i;
-      analogWrite(redpin, i1);
-    }
-    else
-    {
-      digitalWrite(redpin, LOW);
-    }
-    if (Led2 == HIGH)
-    {
-      digitalWrite(bluepin, HIGH);
-    }
-    else
-    {
-      digitalWrite(bluepin, LOW);
-    }
-    if (Led3 == HIGH)
-    {
-      digitalWrite(greenpin, HIGH);
-    }
-    else
-    {
-      digitalWrite(greenpin, LOW);
-    }
-    prevTime = millis();
-    while (currentTime - prevTime < twentymillis)
-    {
-      currentTime = millis();
-    }
-  }
-  currentTime = 0;
-  for (i = 255; i > 0; i -= 5)
-  {
-    if (Led1 == HIGH)
-    {
-      i1 = i;
-      analogWrite(redpin, i1);
-    }
-    else
-    {
-      digitalWrite(redpin, LOW);
-    }
-    if (Led2 == HIGH)
-    {
-      digitalWrite(bluepin, HIGH);
-    }
-    else
-    {
-      digitalWrite(bluepin, LOW);
-    }
-    if (Led3 == HIGH)
-    {
-      digitalWrite(greenpin, HIGH);
-    }
-    else
-    {
-      digitalWrite(greenpin, LOW);
-    }
-    prevTime = millis();
-    while (currentTime - prevTime < twentymillis)
-    {
-      currentTime = millis();
-    }
+    return false;
   }
 }

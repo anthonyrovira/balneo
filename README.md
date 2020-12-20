@@ -1,6 +1,6 @@
 # balneo
 
-A Particle project named balneo
+Un projet Particle nommé balneo
 
 ## Description du projet
 
@@ -9,12 +9,12 @@ Le système possède également un afficheur OLED permettant d'afficher les vale
 
 ## Notes de versions
 
-`v2.0` : Object-oriented version
+`v2.0` : Step up in progress version
 
-    - Création de classes et d'objets pour organiser la structure du code
+    - Création de classes et d'objets pour organiser la structure du code.
     - Intégration d'un véritable workflow géré via un `switch` dans la boucle principale.
     - Données remontées sur le cloud particle : Température, Humidité, CO2, Présence, Compteur de présence.
-    - Fonctions accessible sur le cloud particle : Reset.
+    - Fonctions accessibles sur le cloud particle : Reset.
 
 `v1.0` : Noob version
 

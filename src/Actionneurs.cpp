@@ -1,7 +1,7 @@
 #include "Actionneurs.h"
 
 OledWingAdafruit display;
-Timer timer;
+Timing timing;
 Capteurs capteurs;
 
 enum Etat_MENU
@@ -14,7 +14,7 @@ Etat_MENU etat_MENU = MENU_temp;
 
 void Actionneurs::begin()
 {
-    Particle.publish("IHM", "Actionneurs init", PRIVATE);
+    /*Particle.publish("IHM", "Actionneurs init", PRIVATE);*/
 
     // Initialisation de la led RGB
     pinMode(REDPIN, OUTPUT);
@@ -48,7 +48,8 @@ void Actionneurs::displayTemp(float temperature)
     display.print(temperature);
     display.println(F(" C"));
     display.display();
-    timer.displayTimeout = millis();
+    //timing.displayTimeout = millis();
+    timing.waitingLoop(TEMPO_MAJ_10SEC);
 }
 
 void Actionneurs::displayHr(float humidity)
@@ -69,7 +70,8 @@ void Actionneurs::displayHr(float humidity)
 
     display.drawCircle(display.width() - 4, display.height() - 4, 3, WHITE);
     display.display();
-    timer.displayTimeout = millis();
+    //timing.displayTimeout = millis();
+    timing.waitingLoop(TEMPO_MAJ_10SEC);
 }
 
 void Actionneurs::displayCo2(int co2)
@@ -84,7 +86,8 @@ void Actionneurs::displayCo2(int co2)
     display.print(co2);
     display.println(F("ppm"));
     display.display();
-    timer.displayTimeout = millis();
+    //timing.displayTimeout = millis();
+    timing.waitingLoop(TEMPO_MAJ_10SEC);
 }
 
 void Actionneurs::redLight(int r_value)
@@ -158,17 +161,13 @@ void Actionneurs::blinkLED(int nb, int loopTime)
 void Actionneurs::fadingLed(int redLed, int greenLed, int blueLed)
 {
     int i;
-    int ledValue;
-    int currentTime = 0;
     int prevTime;
-    int twentymillis = 20;
 
     for (i = 0; i < 255; i += 5)
     {
         if (redLed == HIGH)
         {
-            ledValue = i;
-            redLight(ledValue);
+            redLight(i);
         }
         else
             redLight(LOW);
@@ -186,19 +185,13 @@ void Actionneurs::fadingLed(int redLed, int greenLed, int blueLed)
         else
             greenLight(LOW);
 
-        prevTime = millis();
-        while (currentTime - prevTime < twentymillis)
-        {
-            currentTime = millis();
-        }
+        timing.waitingLoop(TEMPO_MAJ_20mSEC);
     }
-    currentTime = 0;
     for (i = 255; i > 0; i -= 5)
     {
         if (redLed == HIGH)
         {
-            ledValue = i;
-            redLight(ledValue);
+            redLight(i);
         }
         else
             redLight(LOW);
@@ -215,11 +208,8 @@ void Actionneurs::fadingLed(int redLed, int greenLed, int blueLed)
         }
         else
             greenLight(LOW);
-        prevTime = millis();
-        while (currentTime - prevTime < twentymillis)
-        {
-            currentTime = millis();
-        }
+
+        timing.waitingLoop(TEMPO_MAJ_20mSEC);
     }
 }
 

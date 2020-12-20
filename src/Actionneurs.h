@@ -4,7 +4,7 @@
 // Cette bibliothèque contient la classe affichage qui permet de gérer tous
 // les affichages de sur l'écran OLED
 
-#include <oled-wing-adafruit.h>
+#include "oled-wing-adafruit.h"
 #include "Variables.h"
 #include "Capteurs.h"
 
