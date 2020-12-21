@@ -12,10 +12,12 @@
 // définition de la classe affichage
 class Actionneurs
 {
-    Donnees donnees; // Structure "données" pour stocker les résultats des mesures des capteurs
-
     // déclaration des variables et des méthodes
 public:
+    Actionneurs();
+
+    Donnees donnees; // Structure "données" pour stocker les résultats des mesures des capteurs
+
     void begin();
 
     // Ecran OLED
@@ -33,10 +35,12 @@ public:
     void fadingLed(int, int, int);
 
     // Process
-    void processLED();
-    void processMotor();
+    void processLED(int, int, int);
+    void processMotor(int);
 
 private:
+    // Waiting function
+    void waitingLoop(unsigned int);
 };
 
 #endif

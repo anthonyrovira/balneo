@@ -7,6 +7,7 @@
     - Afficher les valeurs de capteurs sur l'écran lors d'une présence
     - Gérer la tempo des fonctions `fadingLed`
     - Gestion de la remise à zéro du compteur de présence.
+    - Fonction de retour de qualité d'air (humidité et co2)
     - Calcul des temps de présence dans la pièce
     - Calcul des temps pour chaque changement d'état de la QAI dans la pièce
 
@@ -27,6 +28,5 @@
 
     - Stocker les data dans influxdb via les API Particle
     - Réceptionner et mettre en forme les data sur un dashboard
-    - Fonction de retour de qualité d'air (humidité et co2)
     - Fonction pour effectuer une dérogation sur la ventilation
     - Test du code

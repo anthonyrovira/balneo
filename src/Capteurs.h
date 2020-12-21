@@ -19,6 +19,7 @@ public:
     Capteurs();
 
     Donnees donnees; // Structure "données" pour stocker les résultats des mesures des capteurs
+    Timing timingCapteurs;
 
     /* déclaration des variables et des méthodes publiques */
     bool begin(); // initialisation des capteurs
@@ -31,6 +32,9 @@ public:
     void newPresence();
     int counterNbPresence(); //Compteur de présence dans la pièce
     void RAZNbPresence();    // Remise à zéro du compteur de nombre de fronts montant du détecteur de présence
+    int r_capteurs;          // Couleur rouge de la led
+    int g_capteurs;          // Couleur verte de la led
+    int b_capteurs;          // Couleur bleue de la led
 
     /* Prise de mesures */
     bool MAJCapteurs(); // Lancer toutes les méthodes précédentes en même temps
@@ -48,6 +52,8 @@ public:
 
     /* private fonctions*/
 private:
+    /*--------- En remplacement de la fonction delay ------------ */
+    void waitingLoop(unsigned int);
 };
 
 #endif

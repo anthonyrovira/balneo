@@ -3,9 +3,6 @@
 PietteTech_DHT dht(DHT22_PIN, DHT22);
 MHZ19BCO2SensorSerial<USARTSerial> mhz19b(Serial1);
 
-Actionneurs actionneurs;
-Timing timing;
-
 Capteurs::Capteurs()
 {
     //Initialisation des variables
@@ -22,13 +19,24 @@ bool Capteurs::begin()
     pinMode(PIR_PIN, INPUT_PULLDOWN);
     //attachInterrupt(PIR_PIN, newPresence, RISING);
 
-    delay(100);
+    waitingLoop(100);
 
     dht.begin();
     return state;
 }
 
-float arrondi(float number)
+void Capteurs::waitingLoop(unsigned int timeInMs)
+{
+    unsigned long previousTime = millis();
+    bool waiting = false;
+    while (millis() - previousTime >= timeInMs)
+    {
+        waiting = true;
+    }
+    waiting = false;
+}
+
+float Capteurs::arrondi(float number)
 {
     return (int)(number * pow(10, 2) + .5) / pow(10, 2);
 }
@@ -129,7 +137,7 @@ bool Capteurs::processPresence()
             donnees.lastPresence = donnees.presence;
             donnees.nbPresence++;
             Particle.publish("Motion-Detection", "presence", PRIVATE);
-            timing.debutPresence = millis();
+            timingCapteurs.debutPresence = millis();
         }
         return true;
     }
@@ -139,8 +147,8 @@ bool Capteurs::processPresence()
         {
             donnees.lastPresence = donnees.presence;
             Particle.publish("Motion-Detection", "absence", PRIVATE);
-            timing.finPresence = millis();
-            timing.dureePresence = ((timing.finPresence - timing.debutPresence) / 1000) / 60;
+            timingCapteurs.finPresence = millis();
+            timingCapteurs.dureePresence = ((timingCapteurs.finPresence - timingCapteurs.debutPresence) / 1000) / 60;
         }
         return false;
     }
@@ -155,12 +163,12 @@ void Capteurs::evaluateAirQuality()
         {
             donnees.lastIndiceQAI = donnees.indiceQAI;
             Particle.publish("error", "Invalid data from sensors", PRIVATE);
-            timing.dureeChgtQAI = ((millis() - timing.dernierChgtQAI) / 1000) / 60;
-            timing.dernierChgtQAI = millis();
+            timingCapteurs.dureeChgtQAI = ((millis() - timingCapteurs.dernierChgtQAI) / 1000) / 60;
+            timingCapteurs.dernierChgtQAI = millis();
         }
-        donnees.r_value = HIGH;
-        donnees.g_value = LOW;
-        donnees.b_value = HIGH;
+        r_capteurs = HIGH;
+        g_capteurs = LOW;
+        b_capteurs = HIGH;
     }
     else
     {
@@ -171,12 +179,12 @@ void Capteurs::evaluateAirQuality()
             {
                 donnees.lastIndiceQAI = donnees.indiceQAI;
                 Particle.publish("newState", "red", PRIVATE);
-                timing.dureeChgtQAI = ((millis() - timing.dernierChgtQAI) / 1000) / 60;
-                timing.dernierChgtQAI = millis();
+                timingCapteurs.dureeChgtQAI = ((millis() - timingCapteurs.dernierChgtQAI) / 1000) / 60;
+                timingCapteurs.dernierChgtQAI = millis();
             }
-            donnees.r_value = HIGH;
-            donnees.g_value = LOW;
-            donnees.b_value = LOW;
+            r_capteurs = HIGH;
+            g_capteurs = LOW;
+            b_capteurs = LOW;
         }
         else if (((donnees.humidity > 65) && (donnees.humidity <= 75)) || ((donnees.co2 > 700) && (donnees.co2 <= 1400)))
         {
@@ -185,12 +193,12 @@ void Capteurs::evaluateAirQuality()
             {
                 donnees.lastIndiceQAI = donnees.indiceQAI;
                 Particle.publish("newState", "blue", PRIVATE);
-                timing.dureeChgtQAI = ((millis() - timing.dernierChgtQAI) / 1000) / 60;
-                timing.dernierChgtQAI = millis();
+                timingCapteurs.dureeChgtQAI = ((millis() - timingCapteurs.dernierChgtQAI) / 1000) / 60;
+                timingCapteurs.dernierChgtQAI = millis();
             }
-            donnees.r_value = LOW;
-            donnees.g_value = LOW;
-            donnees.b_value = HIGH;
+            r_capteurs = LOW;
+            g_capteurs = LOW;
+            b_capteurs = HIGH;
         }
         else if (((donnees.humidity > 65) && (donnees.humidity <= 75)) || ((donnees.co2 > 700) && (donnees.co2 <= 1400)))
         {
@@ -199,12 +207,12 @@ void Capteurs::evaluateAirQuality()
             {
                 donnees.lastIndiceQAI = donnees.indiceQAI;
                 Particle.publish("newState", "lightBlue", PRIVATE);
-                timing.dureeChgtQAI = ((millis() - timing.dernierChgtQAI) / 1000) / 60;
-                timing.dernierChgtQAI = millis();
+                timingCapteurs.dureeChgtQAI = ((millis() - timingCapteurs.dernierChgtQAI) / 1000) / 60;
+                timingCapteurs.dernierChgtQAI = millis();
             }
-            donnees.r_value = LOW;
-            donnees.g_value = HIGH;
-            donnees.b_value = HIGH;
+            r_capteurs = LOW;
+            g_capteurs = HIGH;
+            b_capteurs = HIGH;
         }
         else if ((donnees.humidity <= 65) && (donnees.co2 <= 700))
         {
@@ -213,12 +221,12 @@ void Capteurs::evaluateAirQuality()
             {
                 donnees.lastIndiceQAI = donnees.indiceQAI;
                 Particle.publish("newState", "green", PRIVATE);
-                timing.dureeChgtQAI = ((millis() - timing.dernierChgtQAI) / 1000) / 60;
-                timing.dernierChgtQAI = millis();
+                timingCapteurs.dureeChgtQAI = ((millis() - timingCapteurs.dernierChgtQAI) / 1000) / 60;
+                timingCapteurs.dernierChgtQAI = millis();
             }
-            donnees.r_value = LOW;
-            donnees.g_value = HIGH;
-            donnees.b_value = LOW;
+            r_capteurs = LOW;
+            g_capteurs = HIGH;
+            b_capteurs = LOW;
         }
     }
     donnees.lastIndiceQAI = donnees.indiceQAI;

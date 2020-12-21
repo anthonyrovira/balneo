@@ -1,7 +1,6 @@
 #ifndef VARIABLES_H
 #define VARIABLES_H
 
-#include "Particle.h"
 #include "application.h"
 #include "Pins.h"
 #include "Timing.h"
@@ -53,7 +52,7 @@
 /********************************************************************
  * Variables globales
 ********************************************************************/
-size_t tailleEEPROM; // Returns the total number of bytes available in the emulated EEPROM
+//size_t tailleEEPROM; // Returns the total number of bytes available in the emulated EEPROM
 
 /********************************************************************
  * Indices relatif aux données de qualité d'air
@@ -104,9 +103,6 @@ public:
     volatile int lastPresence;  // Indicateur de comparaison pour savoir s'il s'agit réellement d'une nouvelle présence
     volatile int lastIndiceQAI; // Indicateur de comparaison pour la qaulité d'air
     volatile int nbPresence;    // Intensité des mouvement dans la pièce (entier >0)
-    int r_value;                // Couleur rouge de la led
-    int g_value;                // Couleur verte de la led
-    int b_value;                // Couleur bleue de la led
     bool etat_LED;              // Etat de la LED
     bool etat_connexion;        // Etat de la connexion du Particle
 
@@ -125,9 +121,6 @@ public:
         lastPresence = -1;
         lastIndiceQAI = -1;
         nbPresence = -1;        // Intensité des mouvement dans la pièce (entier >0)
-        r_value = HIGH;         // Couleur rouge de la led
-        g_value = HIGH;         // Couleur verte de la led
-        b_value = HIGH;         // Couleur bleue de la led
         etat_LED = false;       // Etat de la LED
         etat_connexion = false; // Etat de la connexion du Particle
 
@@ -146,9 +139,6 @@ public:
         lastPresence = LOW;
         lastIndiceQAI = -1;
         nbPresence = 0;         // Intensité des mouvement dans la pièce (entier >0)
-        r_value = LOW;          // Couleur rouge de la led
-        g_value = LOW;          // Couleur verte de la led
-        b_value = LOW;          // Couleur bleue de la led
         etat_LED = false;       // Etat de la LED
         etat_connexion = false; // Etat de la connexion du Particle
 

@@ -5,11 +5,9 @@
  * Date: 20/03/2020
  */
 
-#include "Pins.h"
+#include "application.h"
 #include "Capteurs.h"
-#include "Variables.h"
 #include "Actionneurs.h"
-#include "Timing.h"
 
 //#define SCREEN_WIDTH 128 // OLED display width, in pixels
 //#define SCREEN_HEIGHT 32 // OLED display height, in pixels
@@ -107,13 +105,14 @@ void loop()
 
     if (capteurs.processPresence())
     {
-      actionneurs.processLED();
+      actionneurs.processLED(capteurs.r_capteurs, capteurs.g_capteurs, capteurs.b_capteurs);
       actionneurs.displayTemp(capteurs.donnees.temperature);
       actionneurs.displayHr(capteurs.donnees.humidity);
       actionneurs.displayCo2(capteurs.donnees.co2);
     }
     else
     {
+      actionneurs.standby();
       actionneurs.fadingLed(HIGH, HIGH, HIGH);
       actionneurs.fadingLed(HIGH, HIGH, LOW);
       actionneurs.fadingLed(HIGH, LOW, HIGH);
@@ -154,7 +153,7 @@ void loop()
 
   //**************************************************
   case COMMANDE:
-    actionneurs.processMotor();
+    actionneurs.processMotor(capteurs.donnees.indiceQAI);
 
     etat = PUBLISH;
     break;
@@ -166,8 +165,8 @@ void loop()
     _co2 = capteurs.donnees.co2;
     _presence = capteurs.donnees.presence;
     _nbPresence = capteurs.donnees.nbPresence;
-    _dureePresence = (int)timing.dureePresence;
-    _dureeChgtQAI = (int)timing.dureeChgtQAI;
+    _dureePresence = (int)capteurs.timingCapteurs.dureePresence;
+    _dureeChgtQAI = (int)capteurs.timingCapteurs.dureeChgtQAI;
 
     etat = IDLE;
     break;

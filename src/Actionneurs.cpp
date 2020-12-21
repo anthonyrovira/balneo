@@ -1,8 +1,6 @@
 #include "Actionneurs.h"
 
 OledWingAdafruit display;
-Timing timing;
-Capteurs capteurs;
 
 enum Etat_MENU
 {
@@ -11,6 +9,10 @@ enum Etat_MENU
     MENU_co2 = 20  // Affichage des données de co2
 };
 Etat_MENU etat_MENU = MENU_temp;
+
+Actionneurs::Actionneurs()
+{
+}
 
 void Actionneurs::begin()
 {
@@ -25,6 +27,17 @@ void Actionneurs::begin()
     display.setup();
     display.clearDisplay();
     display.display();
+}
+
+void Actionneurs::waitingLoop(unsigned int timeInMs)
+{
+    unsigned long previousTime = millis();
+    bool waiting = false;
+    while (millis() - previousTime >= timeInMs)
+    {
+        waiting = true;
+    }
+    waiting = false;
 }
 
 void Actionneurs::standby()
@@ -48,8 +61,8 @@ void Actionneurs::displayTemp(float temperature)
     display.print(temperature);
     display.println(F(" C"));
     display.display();
-    //timing.displayTimeout = millis();
-    timing.waitingLoop(TEMPO_MAJ_10SEC);
+
+    waitingLoop(TEMPO_MAJ_10SEC);
 }
 
 void Actionneurs::displayHr(float humidity)
@@ -70,8 +83,8 @@ void Actionneurs::displayHr(float humidity)
 
     display.drawCircle(display.width() - 4, display.height() - 4, 3, WHITE);
     display.display();
-    //timing.displayTimeout = millis();
-    timing.waitingLoop(TEMPO_MAJ_10SEC);
+
+    waitingLoop(TEMPO_MAJ_10SEC);
 }
 
 void Actionneurs::displayCo2(int co2)
@@ -86,8 +99,8 @@ void Actionneurs::displayCo2(int co2)
     display.print(co2);
     display.println(F("ppm"));
     display.display();
-    //timing.displayTimeout = millis();
-    timing.waitingLoop(TEMPO_MAJ_10SEC);
+
+    waitingLoop(TEMPO_MAJ_10SEC);
 }
 
 void Actionneurs::redLight(int r_value)
@@ -185,7 +198,7 @@ void Actionneurs::fadingLed(int redLed, int greenLed, int blueLed)
         else
             greenLight(LOW);
 
-        timing.waitingLoop(TEMPO_MAJ_20mSEC);
+        waitingLoop(TEMPO_MAJ_20mSEC);
     }
     for (i = 255; i > 0; i -= 5)
     {
@@ -209,30 +222,30 @@ void Actionneurs::fadingLed(int redLed, int greenLed, int blueLed)
         else
             greenLight(LOW);
 
-        timing.waitingLoop(TEMPO_MAJ_20mSEC);
+        waitingLoop(TEMPO_MAJ_20mSEC);
     }
 }
 
-void Actionneurs::processLED()
+void Actionneurs::processLED(int r_value, int g_value, int b_value)
 {
-    rgbLight(capteurs.donnees.r_value, capteurs.donnees.g_value, capteurs.donnees.b_value);
+    rgbLight(r_value, g_value, b_value);
 }
 
-void Actionneurs::processMotor()
+void Actionneurs::processMotor(int indiceQAI)
 {
-    if (capteurs.donnees.indiceQAI == QAI_rouge)
+    if (indiceQAI == QAI_rouge)
     {
         analogWrite(MOTOR_PIN, MAX_SPEED);
     }
-    else if (capteurs.donnees.indiceQAI == QAI_bleuFonce)
+    else if (indiceQAI == QAI_bleuFonce)
     {
         analogWrite(MOTOR_PIN, INTER2_SPEED);
     }
-    else if (capteurs.donnees.indiceQAI == QAI_bleuClair)
+    else if (indiceQAI == QAI_bleuClair)
     {
         analogWrite(MOTOR_PIN, INTER1_SPEED);
     }
-    else if (capteurs.donnees.indiceQAI == QAI_vert)
+    else if (indiceQAI == QAI_vert)
     {
         analogWrite(MOTOR_PIN, MIN_SPEED);
     }
