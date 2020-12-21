@@ -1,0 +1,7 @@
+.vscode/
+
+target/
+
+notes_de_versions.txt
+
+photon_firmware*.bin

@@ -1,35 +1,33 @@
 # balneo
 
-A Particle project named balneo
+Un projet Particle nommé balneo
 
-## Welcome to your project!
+## Description du projet
 
-Every new Particle project is composed of 3 important elements that you'll see have been created in your project directory for balneo.
+Il s'agit d'un système de gestion de la qualité d'air installée dans une salle d'eau. Le système relève la température, l'humidité et le taux de co2 dans l'air. Une ventilation de la pièce est assurée et régulée en fonction de l'humidité et du taux de co2 captés.
+Le système possède également un afficheur OLED permettant d'afficher les valeurs issues des capteurs et un LED RGB en façade pour indiquer l'indice de Qualité d'Air Intérieure calculé.
+Enfin, un capteur de présence permet d'analyser l'occupation de la pièce et de gérer la mise en veille de l'IHM.
 
-#### ```/src``` folder:  
-This is the source folder that contains the firmware files for your project. It should *not* be renamed.
-Anything that is in this folder when you compile your project will be sent to our compile service and compiled into a firmware binary for the Particle device that you have targeted.
+## Notes de versions
 
-If your application contains multiple files, they should all be included in the `src` folder. If your firmware depends on Particle libraries, those dependencies are specified in the `project.properties` file referenced below.
+`v2.1` : Mise à jour majeure => 20/12/2020
 
-#### ```.ino``` file:
-This file is the firmware that will run as the primary application on your Particle device. It contains a `setup()` and `loop()` function, and can be written in Wiring or C/C++. For more information about using the Particle firmware API to create firmware for your Particle device, refer to the [Firmware Reference](https://docs.particle.io/reference/firmware/) section of the Particle documentation.
+    - Revue globale du code et corrections de bugs mineurs
+    - Création de la structure Timing.h pour la gestion des données de temporisations
+    - Afficher les valeurs de capteurs sur l'écran lors d'une présence
+    - Gérer la tempo des fonctions `fadingLed`
+    - Gestion de la remise à zéro du compteur de présence.
+    - Fonction de retour de qualité d'air (humidité et co2)
+    - Calcul des temps de présence dans la pièce
+    - Calcul des temps pour chaque changement d'état de la QAI dans la pièce
 
-#### ```project.properties``` file:  
-This is the file that specifies the name and version number of the libraries that your project depends on. Dependencies are added automatically to your `project.properties` file when you add a library to a project using the `particle library add` command in the CLI or add a library in the Desktop IDE.
+`v2.0` : Step up in progress version
 
-## Adding additional files to your project
+    - Création de classes et d'objets pour organiser la structure du code.
+    - Intégration d'un véritable workflow géré via un `switch` dans la boucle principale.
+    - Données remontées sur le cloud particle : Température, Humidité, CO2, Présence, Compteur de présence.
+    - Fonctions accessibles sur le cloud particle : Reset.
 
-#### Projects with multiple sources
-If you would like add additional files to your application, they should be added to the `/src` folder. All files in the `/src` folder will be sent to the Particle Cloud to produce a compiled binary.
+`v1.0` : Noob version
 
-#### Projects with external libraries
-If your project includes a library that has not been registered in the Particle libraries system, you should create a new folder named `/lib/<libraryname>/src` under `/<project dir>` and add the `.h` and `.cpp` files for your library there. All contents of the `/lib` folder and subfolders will also be sent to the Cloud for compilation.
-
-## Compiling your project
-
-When you're ready to compile your project, make sure you have the correct Particle device target selected and run `particle compile <platform>` in the CLI or click the Compile button in the Desktop IDE. The following files in your project folder will be sent to the compile service:
-
-- Everything in the `/src` folder, including your `.ino` application file
-- The `project.properties` file for your project
-- Any libraries stored under `lib/<libraryname>/src`
+    - Un seul fichier main `.ino`

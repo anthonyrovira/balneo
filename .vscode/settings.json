@@ -1,7 +1,13 @@
 {
-    "cortex-debug.openocdPath": "${command:particle.getDebuggerOpenocdPath}",
-    "C_Cpp.default.configurationProvider": "particle.particle-vscode-core",
-    "particle.targetDevice": "photon_balneo",
-    "particle.targetPlatform": "photon",
-    "C_Cpp.errorSquiggles": "Enabled"
+  "cortex-debug.openocdPath": "${command:particle.getDebuggerOpenocdPath}",
+  "C_Cpp.default.configurationProvider": "particle.particle-vscode-core",
+  "particle.targetDevice": "photon_balneo",
+  "particle.targetPlatform": "photon",
+  "C_Cpp.errorSquiggles": "EnabledIfIncludesResolve",
+  "particle.firmwareVersion": "2.0.1",
+  "cSpell.enableFiletypes": [
+    "!cpp",
+    "!markdown",
+    "!plaintext"
+  ]
 }

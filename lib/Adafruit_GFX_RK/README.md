@@ -19,3 +19,14 @@ Recent Arduino IDE releases include the Library Manager for easy installation. O
 - 'Fonts' folder contains bitmap fonts for use with recent (1.1 and later) Adafruit_GFX. To use a font in your Arduino sketch, #include the corresponding .h file and pass address of GFXfont struct to setFont(). Pass NULL to revert to 'classic' fixed-space bitmap font.
 
 - 'fontconvert' folder contains a command-line tool for converting TTF fonts to Adafruit_GFX .h format.
+
+
+# Version History
+
+### 1.5.8 (2020-08-02)
+
+- Fix compiler error for `error: deleted function 'virtual Adafruit_SPITFT::~Adafruit_SPITFT()' overriding non-deleted function` with 2.0.0-rc.1.
+
+### 1.5.7 (2020-05-04)
+
+- Fix compiler error for undefined conversion to SpiClass with 1.5.1-rc.1.
