@@ -180,7 +180,7 @@ void loop()
   case RECONNECT:
 
     capteurs.donnees.etat_connexion = particleConnect();
-    capteurs.donnees.etat_connexion ? Particle.publish("reconnect", "connection is back", PRIVATE) : Particle.publish("reconnect", "reconnection failed", PRIVATE);
+    //capteurs.donnees.etat_connexion ? Particle.publish("reconnect", "connection is back", PRIVATE) : Particle.publish("reconnect", "reconnection failed", PRIVATE);
 
     etat = IDLE;
     break;
@@ -214,18 +214,6 @@ int state_QAI(String command)
 {
   if (command == "" || command == "1" || command.toLowerCase() == "ok")
   {
-    /*
-    int res=0;
-    if (capteurs.donnees.indiceQAI == QAI_error)
-    {
-      res = 0;
-    }
-    else if (capteurs.donnees.indiceQAI == QAI_vert)
-    {
-      res = 1;
-    }
-    */
-
     return capteurs.donnees.indiceQAI;
   }
 }

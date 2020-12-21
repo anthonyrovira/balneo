@@ -42,7 +42,7 @@ void Actionneurs::waitingLoop(unsigned int timeInMs)
 
 void Actionneurs::standby()
 {
-    Particle.publish("IHM", "Switched-off", PRIVATE);
+    //Particle.publish("IHM", "Switched-off", PRIVATE);
 
     // Effacement de l'affichage
     display.clearDisplay();
