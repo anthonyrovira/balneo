@@ -32,6 +32,9 @@ public:
     void redLight(int);
     void greenLight(int);
     void blueLight(int);
+    bool stateRedLight();
+    bool stateGreenLight();
+    bool stateBlueLight();
     void rgbLight(int, int, int);
     void blinkLED(int, int);
     void fadingLed(int, int, int);

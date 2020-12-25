@@ -27,6 +27,7 @@
 ## A faire / A finir
 
     - Stocker les data dans influxdb via les API Particle
+    - Ajouter le CO2 en critère de détection de présence
     - Réceptionner et mettre en forme les data sur un dashboard
     - Fonction pour effectuer une dérogation sur la ventilation
     - Test du code

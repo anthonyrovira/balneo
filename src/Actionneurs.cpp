@@ -22,6 +22,7 @@ void Actionneurs::begin()
     pinMode(REDPIN, OUTPUT);
     pinMode(GREENPIN, OUTPUT);
     pinMode(BLUEPIN, OUTPUT);
+    pinMode(MOTOR_PIN, OUTPUT);
 
     // Initialisation de l'écran
     display.setup();
@@ -109,10 +110,10 @@ void Actionneurs::redLight(int r_value)
 
     if (r_value != 0)
     {
-        dataActionneurs.etat_LED = true;
+        dataActionneurs.etat_LED_rouge = true;
     }
     else
-        dataActionneurs.etat_LED = false;
+        dataActionneurs.etat_LED_rouge = false;
 }
 
 void Actionneurs::greenLight(int g_value)
@@ -121,10 +122,10 @@ void Actionneurs::greenLight(int g_value)
 
     if (g_value != 0)
     {
-        dataActionneurs.etat_LED = true;
+        dataActionneurs.etat_LED_verte = true;
     }
     else
-        dataActionneurs.etat_LED = false;
+        dataActionneurs.etat_LED_verte = false;
 }
 
 void Actionneurs::blueLight(int b_value)
@@ -133,10 +134,25 @@ void Actionneurs::blueLight(int b_value)
 
     if (b_value != 0)
     {
-        dataActionneurs.etat_LED = true;
+        dataActionneurs.etat_LED_bleue = true;
     }
     else
-        dataActionneurs.etat_LED = false;
+        dataActionneurs.etat_LED_bleue = false;
+}
+
+bool Actionneurs::stateRedLight()
+{
+    return dataActionneurs.etat_LED_rouge;
+}
+
+bool Actionneurs::stateGreenLight()
+{
+    return dataActionneurs.etat_LED_verte;
+}
+
+bool Actionneurs::stateBlueLight()
+{
+    return dataActionneurs.etat_LED_bleue;
 }
 
 void Actionneurs::rgbLight(int r_value, int g_value, int b_value)
@@ -145,12 +161,9 @@ void Actionneurs::rgbLight(int r_value, int g_value, int b_value)
     digitalWrite(GREENPIN, g_value);
     digitalWrite(BLUEPIN, b_value);
 
-    if (r_value != 0 && g_value != 0 && b_value != 0)
-    {
-        dataActionneurs.etat_LED = true;
-    }
-    else
-        dataActionneurs.etat_LED = false;
+    r_value != 0 ? dataActionneurs.etat_LED_rouge = true : dataActionneurs.etat_LED_rouge = false;
+    g_value != 0 ? dataActionneurs.etat_LED_verte = true : dataActionneurs.etat_LED_verte = false;
+    b_value != 0 ? dataActionneurs.etat_LED_bleue = true : dataActionneurs.etat_LED_bleue = false;
 }
 
 void Actionneurs::blinkLED(int nb, int loopTime)
@@ -164,7 +177,6 @@ void Actionneurs::blinkLED(int nb, int loopTime)
         if (currentMillis - previousMillis >= loopTime)
         {
             previousMillis = currentMillis;
-            dataActionneurs.etat_LED = !dataActionneurs.etat_LED;
             ledState = !ledState;
             rgbLight(ledState, ledState, ledState);
         }
@@ -174,7 +186,6 @@ void Actionneurs::blinkLED(int nb, int loopTime)
 void Actionneurs::fadingLed(int redLed, int greenLed, int blueLed)
 {
     int i;
-    int prevTime;
 
     for (i = 0; i < 255; i += 5)
     {

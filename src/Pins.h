@@ -43,7 +43,7 @@
         Référence : SOLAR & PAULAU ref. TD-250 ?
         Commande en PWM (3.3v) via  une carte de conversion PWM -> signal 0-10v
         -----------------------------------------*/
-#define MOTOR_PIN 3
+#define MOTOR_PIN A3
 
 #endif
 #endif

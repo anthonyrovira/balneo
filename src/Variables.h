@@ -104,7 +104,9 @@ public:
     volatile int indiceQAI;     // Indice numérique de la qualité d'air
     volatile int lastIndiceQAI; // Indicateur de comparaison pour la qualité d'air
     volatile int nbPresence;    // Intensité des mouvement dans la pièce (entier >0)
-    bool etat_LED;              // Etat de la LED
+    bool etat_LED_rouge;        // Etat de la LED rouge
+    bool etat_LED_verte;        // Etat de la LED verte
+    bool etat_LED_bleue;        // Etat de la LED bleue
     bool etat_connexion;        // Etat de la connexion du Particle
 
     int statut; // Etat des capteurs (0 = OK ou 1 = Erreur)
@@ -123,7 +125,9 @@ public:
         indiceQAI = -1;
         lastIndiceQAI = -1;
         nbPresence = -1;        // Intensité des mouvement dans la pièce (entier >0)
-        etat_LED = false;       // Etat de la LED
+        etat_LED_rouge = false; // Etat de la LED rouge
+        etat_LED_verte = false; // Etat de la LED verte
+        etat_LED_bleue = false; // Etat de la LED bleue
         etat_connexion = false; // Etat de la connexion du Particle
 
         statut = -1; // Etat des capteurs (0 = OK ou 1 = Erreur)
@@ -142,7 +146,9 @@ public:
         indiceQAI = -1;
         lastIndiceQAI = -1;
         nbPresence = 0;         // Intensité des mouvement dans la pièce (entier >0)
-        etat_LED = false;       // Etat de la LED
+        etat_LED_rouge = false; // Etat de la LED rouge
+        etat_LED_verte = false; // Etat de la LED verte
+        etat_LED_bleue = false; // Etat de la LED bleue
         etat_connexion = false; // Etat de la connexion du Particle
 
         statut = 0; // Etat des capteurs (0 = OK ou 1 = Erreur)

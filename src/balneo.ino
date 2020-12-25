@@ -53,6 +53,9 @@ void setup()
   /* Fonctions Particle cloud */
   Particle.function("Reset", cloud_reset);
   Particle.function("QAI", state_QAI);
+  Particle.function("RedLight", redLightToggle);
+  Particle.function("GreenLight", greenLightToggle);
+  Particle.function("BlueLight", blueLightToggle);
 
   /* Variables Particle cloud */
   Particle.variable("temperature", _temperature);
@@ -208,7 +211,7 @@ int cloud_reset(String command)
   // look for the matching argument "reset" <-- max of 64 characters long
   if (command.toLowerCase() == "reset" || command == "1" || command.toLowerCase() == "ok")
   {
-    etat = SYSTEM_RESET;
+    System.reset();
     return 1;
   }
   return -1;
@@ -220,6 +223,63 @@ int state_QAI(String command)
   if (command == "" || command == "1" || command.toLowerCase() == "ok")
   {
     return (int)capteurs.donnees.indiceQAI;
+  }
+  return -1;
+}
+
+// Allumer/Eteindre la led Rouge
+int redLightToggle(String command)
+{
+  if (command == "" || command == "1" || command.toLowerCase() == "ok")
+  {
+    if (actionneurs.stateRedLight())
+    {
+      actionneurs.redLight(LOW);
+      return 0;
+    }
+    else
+    {
+      actionneurs.redLight(HIGH);
+      return 1;
+    }
+  }
+  return -1;
+}
+
+// Allumer/Eteindre la led verte
+int greenLightToggle(String command)
+{
+  if (command == "" || command == "1" || command.toLowerCase() == "ok")
+  {
+    if (actionneurs.stateGreenLight())
+    {
+      actionneurs.greenLight(LOW);
+      return 0;
+    }
+    else
+    {
+      actionneurs.greenLight(HIGH);
+      return 1;
+    }
+  }
+  return -1;
+}
+
+// Allumer/Eteindre la led bleue
+int blueLightToggle(String command)
+{
+  if (command == "" || command == "1" || command.toLowerCase() == "ok")
+  {
+    if (actionneurs.stateBlueLight())
+    {
+      actionneurs.blueLight(LOW);
+      return 0;
+    }
+    else
+    {
+      actionneurs.blueLight(HIGH);
+      return 1;
+    }
   }
   return -1;
 }
