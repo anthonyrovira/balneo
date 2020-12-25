@@ -7,6 +7,7 @@
 #include "oled-wing-adafruit.h"
 #include "Variables.h"
 #include "Capteurs.h"
+#include "Timing.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // définition de la classe affichage
@@ -16,7 +17,8 @@ class Actionneurs
 public:
     Actionneurs();
 
-    Donnees donnees; // Structure "données" pour stocker les résultats des mesures des capteurs
+    Donnees dataActionneurs; // Structure "données" pour stocker les résultats des mesures des capteurs
+    Timing timingActionneurs;
 
     void begin();
 

@@ -29,7 +29,7 @@ void Capteurs::waitingLoop(unsigned int timeInMs)
 {
     unsigned long previousTime = millis();
     bool waiting = false;
-    while (millis() - previousTime >= timeInMs)
+    while (millis() <= previousTime + timeInMs)
     {
         waiting = true;
     }
@@ -104,6 +104,7 @@ int Capteurs::counterNbPresence()
 // Remise à zéro du compteur de nombre de fronts montants du détecteur de présence
 void Capteurs::RAZNbPresence()
 {
+    Particle.publish("info", "24 hrs", PRIVATE);
     donnees.nbPresence = 0;
 }
 

@@ -92,7 +92,7 @@ struct Donnees
 {
     IndiceHR indiceHR;
     IndiceCO2 indiceCo2;
-    IndiceQAI indiceQAI;
+    //IndiceQAI indiceQAI;
 
 public:
     // mesures
@@ -101,7 +101,8 @@ public:
     int co2;                    // Mesure de CO² en ppm
     volatile int presence;      // Présence d'une personne dans la pièce (0 ou 1)
     volatile int lastPresence;  // Indicateur de comparaison pour savoir s'il s'agit réellement d'une nouvelle présence
-    volatile int lastIndiceQAI; // Indicateur de comparaison pour la qaulité d'air
+    volatile int indiceQAI;     // Indice numérique de la qualité d'air
+    volatile int lastIndiceQAI; // Indicateur de comparaison pour la qualité d'air
     volatile int nbPresence;    // Intensité des mouvement dans la pièce (entier >0)
     bool etat_LED;              // Etat de la LED
     bool etat_connexion;        // Etat de la connexion du Particle
@@ -119,6 +120,7 @@ public:
         co2 = -1;           // Mesure de CO² en ppm
         presence = -1;      // Présence d'une personne dans la pièce (0 ou 1)
         lastPresence = -1;
+        indiceQAI = -1;
         lastIndiceQAI = -1;
         nbPresence = -1;        // Intensité des mouvement dans la pièce (entier >0)
         etat_LED = false;       // Etat de la LED
@@ -137,6 +139,7 @@ public:
         co2 = 0;           // Mesure de CO² en ppm
         presence = LOW;    // Présence d'une personne dans la pièce (0 ou 1)
         lastPresence = LOW;
+        indiceQAI = -1;
         lastIndiceQAI = -1;
         nbPresence = 0;         // Intensité des mouvement dans la pièce (entier >0)
         etat_LED = false;       // Etat de la LED

@@ -50,6 +50,10 @@ byte lastState = 10;
 
 void setup()
 {
+  /* Fonctions Particle cloud */
+  Particle.function("Reset", cloud_reset);
+  Particle.function("QAI", state_QAI);
+
   /* Variables Particle cloud */
   Particle.variable("temperature", _temperature);
   Particle.variable("humidity", _humidity);
@@ -58,10 +62,6 @@ void setup()
   Particle.variable("NbPresence", _nbPresence);
   Particle.variable("dureePresence", _dureePresence);
   Particle.variable("dureeChgtQAI", _dureeChgtQAI);
-
-  /* Fonctions Particle cloud */
-  Particle.function("Reset", cloud_reset);
-  Particle.function("QAI", state_QAI);
 
   particleConnect();
 
@@ -101,6 +101,7 @@ void loop()
     if (millis() - timing.derniereMAJ_24H >= TEMPO_MAJ_24H)
     {
       capteurs.RAZNbPresence();
+      timing.derniereMAJ_24H = millis();
     }
 
     if (capteurs.processPresence())
@@ -147,6 +148,7 @@ void loop()
   case PROCESS:
     capteurs.evaluateAirQuality();
     capteurs.processPresence();
+    Particle.publish("info", "news data available", PRIVATE);
 
     etat = COMMANDE;
     break;
@@ -167,6 +169,7 @@ void loop()
     _nbPresence = capteurs.donnees.nbPresence;
     _dureePresence = (int)capteurs.timingCapteurs.dureePresence;
     _dureeChgtQAI = (int)capteurs.timingCapteurs.dureeChgtQAI;
+    //Particle.publish("info", "news data available", PRIVATE);
 
     etat = IDLE;
     break;
@@ -206,7 +209,9 @@ int cloud_reset(String command)
   if (command.toLowerCase() == "reset" || command == "1" || command.toLowerCase() == "ok")
   {
     etat = SYSTEM_RESET;
+    return 1;
   }
+  return -1;
 }
 
 // Pour obtenir l'indice de QAI actuel
@@ -214,8 +219,9 @@ int state_QAI(String command)
 {
   if (command == "" || command == "1" || command.toLowerCase() == "ok")
   {
-    return capteurs.donnees.indiceQAI;
+    return (int)capteurs.donnees.indiceQAI;
   }
+  return -1;
 }
 
 // Procédure de connexion au cloud Particle

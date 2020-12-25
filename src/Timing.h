@@ -75,7 +75,7 @@ public:
     {
         unsigned long previousTime = millis();
         bool waiting = false;
-        while (millis() - previousTime >= timeInMs)
+        while (millis() <= previousTime + timeInMs)
         {
             waiting = true;
         }

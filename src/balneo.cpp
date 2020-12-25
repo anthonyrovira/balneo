@@ -62,6 +62,10 @@ byte lastState = 10;
 
 void setup()
 {
+  /* Fonctions Particle cloud */
+  Particle.function("Reset", cloud_reset);
+  Particle.function("QAI", state_QAI);
+
   /* Variables Particle cloud */
   Particle.variable("temperature", _temperature);
   Particle.variable("humidity", _humidity);
@@ -70,10 +74,6 @@ void setup()
   Particle.variable("NbPresence", _nbPresence);
   Particle.variable("dureePresence", _dureePresence);
   Particle.variable("dureeChgtQAI", _dureeChgtQAI);
-
-  /* Fonctions Particle cloud */
-  Particle.function("Reset", cloud_reset);
-  Particle.function("QAI", state_QAI);
 
   particleConnect();
 
@@ -113,6 +113,7 @@ void loop()
     if (millis() - timing.derniereMAJ_24H >= TEMPO_MAJ_24H)
     {
       capteurs.RAZNbPresence();
+      timing.derniereMAJ_24H = millis();
     }
 
     if (capteurs.processPresence())
@@ -159,6 +160,7 @@ void loop()
   case PROCESS:
     capteurs.evaluateAirQuality();
     capteurs.processPresence();
+    Particle.publish("info", "news data available", PRIVATE);
 
     etat = COMMANDE;
     break;
@@ -179,6 +181,7 @@ void loop()
     _nbPresence = capteurs.donnees.nbPresence;
     _dureePresence = (int)capteurs.timingCapteurs.dureePresence;
     _dureeChgtQAI = (int)capteurs.timingCapteurs.dureeChgtQAI;
+    //Particle.publish("info", "news data available", PRIVATE);
 
     etat = IDLE;
     break;
@@ -192,7 +195,7 @@ void loop()
   case RECONNECT:
 
     capteurs.donnees.etat_connexion = particleConnect();
-    capteurs.donnees.etat_connexion ? Particle.publish("reconnect", "connection is back", PRIVATE) : Particle.publish("reconnect", "reconnection failed", PRIVATE);
+    //capteurs.donnees.etat_connexion ? Particle.publish("reconnect", "connection is back", PRIVATE) : Particle.publish("reconnect", "reconnection failed", PRIVATE);
 
     etat = IDLE;
     break;
@@ -226,19 +229,7 @@ int state_QAI(String command)
 {
   if (command == "" || command == "1" || command.toLowerCase() == "ok")
   {
-    /*
-    int res=0;
-    if (capteurs.donnees.indiceQAI == QAI_error)
-    {
-      res = 0;
-    }
-    else if (capteurs.donnees.indiceQAI == QAI_vert)
-    {
-      res = 1;
-    }
-    */
-
-    return capteurs.donnees.indiceQAI;
+    return (int)capteurs.donnees.indiceQAI;
   }
 }
 

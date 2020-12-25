@@ -33,7 +33,7 @@ void Actionneurs::waitingLoop(unsigned int timeInMs)
 {
     unsigned long previousTime = millis();
     bool waiting = false;
-    while (millis() - previousTime >= timeInMs)
+    while (millis() <= previousTime + timeInMs)
     {
         waiting = true;
     }
@@ -109,10 +109,10 @@ void Actionneurs::redLight(int r_value)
 
     if (r_value != 0)
     {
-        donnees.etat_LED = true;
+        dataActionneurs.etat_LED = true;
     }
     else
-        donnees.etat_LED = false;
+        dataActionneurs.etat_LED = false;
 }
 
 void Actionneurs::greenLight(int g_value)
@@ -121,10 +121,10 @@ void Actionneurs::greenLight(int g_value)
 
     if (g_value != 0)
     {
-        donnees.etat_LED = true;
+        dataActionneurs.etat_LED = true;
     }
     else
-        donnees.etat_LED = false;
+        dataActionneurs.etat_LED = false;
 }
 
 void Actionneurs::blueLight(int b_value)
@@ -133,10 +133,10 @@ void Actionneurs::blueLight(int b_value)
 
     if (b_value != 0)
     {
-        donnees.etat_LED = true;
+        dataActionneurs.etat_LED = true;
     }
     else
-        donnees.etat_LED = false;
+        dataActionneurs.etat_LED = false;
 }
 
 void Actionneurs::rgbLight(int r_value, int g_value, int b_value)
@@ -147,10 +147,10 @@ void Actionneurs::rgbLight(int r_value, int g_value, int b_value)
 
     if (r_value != 0 && g_value != 0 && b_value != 0)
     {
-        donnees.etat_LED = true;
+        dataActionneurs.etat_LED = true;
     }
     else
-        donnees.etat_LED = false;
+        dataActionneurs.etat_LED = false;
 }
 
 void Actionneurs::blinkLED(int nb, int loopTime)
@@ -164,7 +164,7 @@ void Actionneurs::blinkLED(int nb, int loopTime)
         if (currentMillis - previousMillis >= loopTime)
         {
             previousMillis = currentMillis;
-            donnees.etat_LED = !donnees.etat_LED;
+            dataActionneurs.etat_LED = !dataActionneurs.etat_LED;
             ledState = !ledState;
             rgbLight(ledState, ledState, ledState);
         }
@@ -231,21 +231,21 @@ void Actionneurs::processLED(int r_value, int g_value, int b_value)
     rgbLight(r_value, g_value, b_value);
 }
 
-void Actionneurs::processMotor(int indiceQAI)
+void Actionneurs::processMotor(int indexQAI)
 {
-    if (indiceQAI == QAI_rouge)
+    if (indexQAI == (int)QAI_rouge)
     {
         analogWrite(MOTOR_PIN, MAX_SPEED);
     }
-    else if (indiceQAI == QAI_bleuFonce)
+    else if (indexQAI == (int)QAI_bleuFonce)
     {
         analogWrite(MOTOR_PIN, INTER2_SPEED);
     }
-    else if (indiceQAI == QAI_bleuClair)
+    else if (indexQAI == (int)QAI_bleuClair)
     {
         analogWrite(MOTOR_PIN, INTER1_SPEED);
     }
-    else if (indiceQAI == QAI_vert)
+    else if (indexQAI == (int)QAI_vert)
     {
         analogWrite(MOTOR_PIN, MIN_SPEED);
     }
