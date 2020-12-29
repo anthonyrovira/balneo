@@ -5,17 +5,17 @@
  * Configuration des pins spécifiques pour chaque microcontrôleur
 ********************************************************************/
 
-#define ARGON // A un impact sur la définition des pins dans le programme : Valeurs possibles : ARGON ou PHOTON
+#define PHOTON // A un impact sur la définition des pins dans le programme : Valeurs possibles : PHOTON
 
-#ifdef ARGON // Cas d'un microcontrôleur ARGON
+#ifdef PHOTON // Cas d'un microcontrôleur PHOTON
 
 /* ----- LED RGB -----------
         Référence : KY-016
         Lien internet : https://arduinomodules.info/ky-016-rgb-full-color-led-module/
         ------------------------*/
-#define REDPIN 2
-#define BLUEPIN 4
-#define GREENPIN 5
+#define REDPIN D2
+#define BLUEPIN D4
+#define GREENPIN D5
 
 /* ----- ECRAN OLED -----------
         Référence : MakerHawk OLED Module d'affichage, SPI I2C IIC 128X64 LCD
@@ -43,7 +43,7 @@
         Référence : SOLAR & PAULAU ref. TD-250 ?
         Commande en PWM (3.3v) via  une carte de conversion PWM -> signal 0-10v
         -----------------------------------------*/
-#define MOTOR_PIN A3
+#define MOTOR_PIN D3
 
 #endif
 #endif

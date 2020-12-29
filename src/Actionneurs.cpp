@@ -19,10 +19,10 @@ void Actionneurs::begin()
     /*Particle.publish("IHM", "Actionneurs init", PRIVATE);*/
 
     // Initialisation de la led RGB
+    pinMode(MOTOR_PIN, OUTPUT);
     pinMode(REDPIN, OUTPUT);
     pinMode(GREENPIN, OUTPUT);
     pinMode(BLUEPIN, OUTPUT);
-    pinMode(MOTOR_PIN, OUTPUT);
 
     // Initialisation de l'écran
     display.setup();
@@ -106,7 +106,7 @@ void Actionneurs::displayCo2(int co2)
 
 void Actionneurs::redLight(int r_value)
 {
-    digitalWrite(REDPIN, r_value);
+    analogWrite(REDPIN, r_value);
 
     if (r_value != 0)
     {
@@ -118,6 +118,8 @@ void Actionneurs::redLight(int r_value)
 
 void Actionneurs::greenLight(int g_value)
 {
+    g_value >= 1 ? g_value = HIGH : g_value = LOW;
+
     digitalWrite(GREENPIN, g_value);
 
     if (g_value != 0)
@@ -130,6 +132,8 @@ void Actionneurs::greenLight(int g_value)
 
 void Actionneurs::blueLight(int b_value)
 {
+    b_value >= 1 ? b_value = HIGH : b_value = LOW;
+
     digitalWrite(BLUEPIN, b_value);
 
     if (b_value != 0)
@@ -157,7 +161,7 @@ bool Actionneurs::stateBlueLight()
 
 void Actionneurs::rgbLight(int r_value, int g_value, int b_value)
 {
-    digitalWrite(REDPIN, r_value);
+    analogWrite(REDPIN, r_value);
     digitalWrite(GREENPIN, g_value);
     digitalWrite(BLUEPIN, b_value);
 
@@ -169,17 +173,11 @@ void Actionneurs::rgbLight(int r_value, int g_value, int b_value)
 void Actionneurs::blinkLED(int nb, int loopTime)
 {
     int ledState = LOW;
-    unsigned long previousMillis = 0;
-    unsigned long currentMillis = 0;
     for (int i = 0; i < nb * 2; i++)
     {
-        currentMillis = millis();
-        if (currentMillis - previousMillis >= loopTime)
-        {
-            previousMillis = currentMillis;
-            ledState = !ledState;
-            rgbLight(ledState, ledState, ledState);
-        }
+        waitingLoop(loopTime);
+        ledState = !ledState;
+        rgbLight(ledState, ledState, ledState);
     }
 }
 
@@ -189,49 +187,17 @@ void Actionneurs::fadingLed(int redLed, int greenLed, int blueLed)
 
     for (i = 0; i < 255; i += 5)
     {
-        if (redLed == HIGH)
-        {
-            redLight(i);
-        }
-        else
-            redLight(LOW);
-        if (greenLed == HIGH)
-        {
-            blueLight(HIGH);
-        }
-        else
-            blueLight(LOW);
-
-        if (blueLed == HIGH)
-        {
-            greenLight(HIGH);
-        }
-        else
-            greenLight(LOW);
+        redLight(i);
+        greenLed == ON ? greenLight(ON) : greenLight(OFF);
+        blueLed == ON ? blueLight(ON) : blueLight(OFF);
 
         waitingLoop(TEMPO_MAJ_20mSEC);
     }
     for (i = 255; i > 0; i -= 5)
     {
-        if (redLed == HIGH)
-        {
-            redLight(i);
-        }
-        else
-            redLight(LOW);
-
-        if (greenLed == HIGH)
-        {
-            blueLight(HIGH);
-        }
-        else
-            blueLight(LOW);
-        if (blueLed == HIGH)
-        {
-            greenLight(HIGH);
-        }
-        else
-            greenLight(LOW);
+        redLight(i);
+        greenLed == ON ? greenLight(ON) : greenLight(OFF);
+        blueLed == ON ? blueLight(ON) : blueLight(OFF);
 
         waitingLoop(TEMPO_MAJ_20mSEC);
     }
@@ -244,20 +210,29 @@ void Actionneurs::processLED(int r_value, int g_value, int b_value)
 
 void Actionneurs::processMotor(int indexQAI)
 {
-    if (indexQAI == (int)QAI_rouge)
+    if (indexQAI == 4)
     {
         analogWrite(MOTOR_PIN, MAX_SPEED);
+        Particle.publish("motor", "Max", PRIVATE);
     }
-    else if (indexQAI == (int)QAI_bleuFonce)
+    else if (indexQAI == 3)
     {
         analogWrite(MOTOR_PIN, INTER2_SPEED);
+        Particle.publish("motor", "Inter2", PRIVATE);
     }
-    else if (indexQAI == (int)QAI_bleuClair)
+    else if (indexQAI == 2)
     {
         analogWrite(MOTOR_PIN, INTER1_SPEED);
+        Particle.publish("motor", "Inter1", PRIVATE);
     }
-    else if (indexQAI == (int)QAI_vert)
+    else if (indexQAI == 1)
     {
         analogWrite(MOTOR_PIN, MIN_SPEED);
+        Particle.publish("motor", "Min", PRIVATE);
+    }
+    else
+    {
+        digitalWrite(MOTOR_PIN, OFF);
+        Particle.publish("motor", "OFF", PRIVATE);
     }
 }

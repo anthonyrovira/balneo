@@ -6,7 +6,7 @@
 #include "Timing.h"
 
 //  Définition de la version
-#define VERSION "2.0"
+#define VERSION "2.1"
 
 /********************************************************************
  * Variables liées à la board
@@ -47,7 +47,13 @@
 #define MAX_SPEED 214
 #define INTER2_SPEED 170
 #define INTER1_SPEED 95
-#define MIN_SPEED 20
+#define MIN_SPEED 200
+
+/********************************************************************
+ * Variables définissant l'état des LED
+********************************************************************/
+#define ON 255
+#define OFF 0
 
 /********************************************************************
  * Variables globales
@@ -104,6 +110,9 @@ public:
     volatile int indiceQAI;     // Indice numérique de la qualité d'air
     volatile int lastIndiceQAI; // Indicateur de comparaison pour la qualité d'air
     volatile int nbPresence;    // Intensité des mouvement dans la pièce (entier >0)
+    int r_capteurs;             // Couleur rouge de la led
+    int g_capteurs;             // Couleur verte de la led
+    int b_capteurs;             // Couleur bleue de la led
     bool etat_LED_rouge;        // Etat de la LED rouge
     bool etat_LED_verte;        // Etat de la LED verte
     bool etat_LED_bleue;        // Etat de la LED bleue
@@ -124,7 +133,10 @@ public:
         lastPresence = -1;
         indiceQAI = -1;
         lastIndiceQAI = -1;
-        nbPresence = -1;        // Intensité des mouvement dans la pièce (entier >0)
+        nbPresence = 0; // Intensité des mouvement dans la pièce (entier >0)
+        r_capteurs = OFF;
+        g_capteurs = OFF;
+        b_capteurs = OFF;
         etat_LED_rouge = false; // Etat de la LED rouge
         etat_LED_verte = false; // Etat de la LED verte
         etat_LED_bleue = false; // Etat de la LED bleue
@@ -145,7 +157,10 @@ public:
         lastPresence = LOW;
         indiceQAI = -1;
         lastIndiceQAI = -1;
-        nbPresence = 0;         // Intensité des mouvement dans la pièce (entier >0)
+        nbPresence = 0; // Intensité des mouvement dans la pièce (entier >0)
+        r_capteurs = OFF;
+        g_capteurs = OFF;
+        b_capteurs = OFF;
         etat_LED_rouge = false; // Etat de la LED rouge
         etat_LED_verte = false; // Etat de la LED verte
         etat_LED_bleue = false; // Etat de la LED bleue

@@ -14,7 +14,6 @@ bool Capteurs::begin()
     bool state = 1;
     Particle.publish("setup", "Sensor initialization", PRIVATE);
 
-    pinMode(MOTOR_PIN, OUTPUT);
     pinMode(DHT22_PIN, INPUT);
     pinMode(PIR_PIN, INPUT_PULLDOWN);
     //attachInterrupt(PIR_PIN, newPresence, RISING);
@@ -167,9 +166,9 @@ void Capteurs::evaluateAirQuality()
             timingCapteurs.dureeChgtQAI = ((millis() - timingCapteurs.dernierChgtQAI) / 1000) / 60;
             timingCapteurs.dernierChgtQAI = millis();
         }
-        r_capteurs = HIGH;
-        g_capteurs = LOW;
-        b_capteurs = HIGH;
+        donnees.r_capteurs = ON;
+        donnees.g_capteurs = OFF;
+        donnees.b_capteurs = ON;
     }
     else
     {
@@ -183,9 +182,9 @@ void Capteurs::evaluateAirQuality()
                 timingCapteurs.dureeChgtQAI = ((millis() - timingCapteurs.dernierChgtQAI) / 1000) / 60;
                 timingCapteurs.dernierChgtQAI = millis();
             }
-            r_capteurs = HIGH;
-            g_capteurs = LOW;
-            b_capteurs = LOW;
+            donnees.r_capteurs = ON;
+            donnees.g_capteurs = OFF;
+            donnees.b_capteurs = OFF;
         }
         else if (((donnees.humidity > 65) && (donnees.humidity <= 75)) || ((donnees.co2 > 700) && (donnees.co2 <= 1400)))
         {
@@ -197,9 +196,9 @@ void Capteurs::evaluateAirQuality()
                 timingCapteurs.dureeChgtQAI = ((millis() - timingCapteurs.dernierChgtQAI) / 1000) / 60;
                 timingCapteurs.dernierChgtQAI = millis();
             }
-            r_capteurs = LOW;
-            g_capteurs = LOW;
-            b_capteurs = HIGH;
+            donnees.r_capteurs = OFF;
+            donnees.g_capteurs = OFF;
+            donnees.b_capteurs = ON;
         }
         else if (((donnees.humidity > 65) && (donnees.humidity <= 75)) || ((donnees.co2 > 700) && (donnees.co2 <= 1400)))
         {
@@ -211,9 +210,9 @@ void Capteurs::evaluateAirQuality()
                 timingCapteurs.dureeChgtQAI = ((millis() - timingCapteurs.dernierChgtQAI) / 1000) / 60;
                 timingCapteurs.dernierChgtQAI = millis();
             }
-            r_capteurs = LOW;
-            g_capteurs = HIGH;
-            b_capteurs = HIGH;
+            donnees.r_capteurs = OFF;
+            donnees.g_capteurs = ON;
+            donnees.b_capteurs = ON;
         }
         else if ((donnees.humidity <= 65) && (donnees.co2 <= 700))
         {
@@ -225,9 +224,9 @@ void Capteurs::evaluateAirQuality()
                 timingCapteurs.dureeChgtQAI = ((millis() - timingCapteurs.dernierChgtQAI) / 1000) / 60;
                 timingCapteurs.dernierChgtQAI = millis();
             }
-            r_capteurs = LOW;
-            g_capteurs = HIGH;
-            b_capteurs = LOW;
+            donnees.r_capteurs = OFF;
+            donnees.g_capteurs = ON;
+            donnees.b_capteurs = OFF;
         }
     }
     donnees.lastIndiceQAI = donnees.indiceQAI;

@@ -87,11 +87,13 @@ void setup()
 
   capteurs.begin();        // initialisation des capteurs
   capteurs.donnees.init(); // initialisation des donnees des capteurs
+  pinMode(MOTOR_PIN, OUTPUT);
 
   actionneurs.begin();                     // initialisation des actionneurs
   actionneurs.blinkLED(5, TEMPO_MAJ_1SEC); // Clignotement de LED pour vérifier que les actionneurs fonctionnent
 
   Particle.publish("info", "Setup completed", PRIVATE);
+  analogWrite(MOTOR_PIN, MAX_SPEED);
 }
 
 void loop()
@@ -122,6 +124,8 @@ void loop()
       timing.derniereMAJ_24H = millis();
     }
 
+    //actionneurs.processMotor(4);
+
     if (capteurs.processPresence())
     {
       actionneurs.processLED(capteurs.r_capteurs, capteurs.g_capteurs, capteurs.b_capteurs);
@@ -132,9 +136,9 @@ void loop()
     else
     {
       actionneurs.standby();
-      actionneurs.fadingLed(HIGH, HIGH, HIGH);
-      actionneurs.fadingLed(HIGH, HIGH, LOW);
-      actionneurs.fadingLed(HIGH, LOW, HIGH);
+      actionneurs.fadingLed(ON, ON, ON);
+      actionneurs.fadingLed(ON, ON, OFF);
+      actionneurs.fadingLed(ON, OFF, ON);
     }
 
     break;
@@ -166,15 +170,15 @@ void loop()
   case PROCESS:
     capteurs.evaluateAirQuality();
     capteurs.processPresence();
-    Particle.publish("info", "news data available", PRIVATE);
+    //Particle.publish("info", "news data available", PRIVATE);
 
     etat = COMMANDE;
     break;
 
   //**************************************************
   case COMMANDE:
-    actionneurs.processMotor(capteurs.donnees.indiceQAI);
-
+    //actionneurs.processMotor(4);
+    analogWrite(MOTOR_PIN, INTER1_SPEED);
     etat = PUBLISH;
     break;
 
@@ -237,7 +241,7 @@ int state_QAI(String command)
 {
   if (command == "" || command == "1" || command.toLowerCase() == "ok")
   {
-    return (int)capteurs.donnees.indiceQAI;
+    return capteurs.donnees.indiceQAI;
   }
   return -1;
 }
@@ -249,12 +253,12 @@ int redLightToggle(String command)
   {
     if (actionneurs.stateRedLight())
     {
-      actionneurs.redLight(LOW);
+      actionneurs.redLight(OFF);
       return 0;
     }
     else
     {
-      actionneurs.redLight(HIGH);
+      actionneurs.redLight(ON);
       return 1;
     }
   }
@@ -268,12 +272,12 @@ int greenLightToggle(String command)
   {
     if (actionneurs.stateGreenLight())
     {
-      actionneurs.greenLight(LOW);
+      actionneurs.greenLight(OFF);
       return 0;
     }
     else
     {
-      actionneurs.greenLight(HIGH);
+      actionneurs.greenLight(ON);
       return 1;
     }
   }
@@ -287,12 +291,12 @@ int blueLightToggle(String command)
   {
     if (actionneurs.stateBlueLight())
     {
-      actionneurs.blueLight(LOW);
+      actionneurs.blueLight(OFF);
       return 0;
     }
     else
     {
-      actionneurs.blueLight(HIGH);
+      actionneurs.blueLight(ON);
       return 1;
     }
   }
