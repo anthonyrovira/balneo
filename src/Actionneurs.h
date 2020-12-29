@@ -4,9 +4,11 @@
 // Cette bibliothèque contient la classe affichage qui permet de gérer tous
 // les affichages de sur l'écran OLED
 
+#include <SPI.h>
+#include <Wire.h>
 #include "oled-wing-adafruit.h"
 #include "Variables.h"
-#include "Capteurs.h"
+#include "Timing.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // définition de la classe affichage
@@ -16,7 +18,8 @@ class Actionneurs
 public:
     Actionneurs();
 
-    Donnees donnees; // Structure "données" pour stocker les résultats des mesures des capteurs
+    Donnees dataActionneurs; // Structure "données" pour stocker les résultats des mesures des capteurs
+    Timing timingActionneurs;
 
     void begin();
 
@@ -30,6 +33,9 @@ public:
     void redLight(int);
     void greenLight(int);
     void blueLight(int);
+    bool stateRedLight();
+    bool stateGreenLight();
+    bool stateBlueLight();
     void rgbLight(int, int, int);
     void blinkLED(int, int);
     void fadingLed(int, int, int);

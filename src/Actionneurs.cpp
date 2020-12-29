@@ -19,6 +19,7 @@ void Actionneurs::begin()
     /*Particle.publish("IHM", "Actionneurs init", PRIVATE);*/
 
     // Initialisation de la led RGB
+    pinMode(MOTOR_PIN, OUTPUT);
     pinMode(REDPIN, OUTPUT);
     pinMode(GREENPIN, OUTPUT);
     pinMode(BLUEPIN, OUTPUT);
@@ -33,7 +34,7 @@ void Actionneurs::waitingLoop(unsigned int timeInMs)
 {
     unsigned long previousTime = millis();
     bool waiting = false;
-    while (millis() - previousTime >= timeInMs)
+    while (millis() <= previousTime + timeInMs)
     {
         waiting = true;
     }
@@ -105,122 +106,98 @@ void Actionneurs::displayCo2(int co2)
 
 void Actionneurs::redLight(int r_value)
 {
-    digitalWrite(REDPIN, r_value);
+    analogWrite(REDPIN, r_value);
 
     if (r_value != 0)
     {
-        donnees.etat_LED = true;
+        dataActionneurs.etat_LED_rouge = true;
     }
     else
-        donnees.etat_LED = false;
+        dataActionneurs.etat_LED_rouge = false;
 }
 
 void Actionneurs::greenLight(int g_value)
 {
+    g_value >= 1 ? g_value = HIGH : g_value = LOW;
+
     digitalWrite(GREENPIN, g_value);
 
     if (g_value != 0)
     {
-        donnees.etat_LED = true;
+        dataActionneurs.etat_LED_verte = true;
     }
     else
-        donnees.etat_LED = false;
+        dataActionneurs.etat_LED_verte = false;
 }
 
 void Actionneurs::blueLight(int b_value)
 {
+    b_value >= 1 ? b_value = HIGH : b_value = LOW;
+
     digitalWrite(BLUEPIN, b_value);
 
     if (b_value != 0)
     {
-        donnees.etat_LED = true;
+        dataActionneurs.etat_LED_bleue = true;
     }
     else
-        donnees.etat_LED = false;
+        dataActionneurs.etat_LED_bleue = false;
+}
+
+bool Actionneurs::stateRedLight()
+{
+    return dataActionneurs.etat_LED_rouge;
+}
+
+bool Actionneurs::stateGreenLight()
+{
+    return dataActionneurs.etat_LED_verte;
+}
+
+bool Actionneurs::stateBlueLight()
+{
+    return dataActionneurs.etat_LED_bleue;
 }
 
 void Actionneurs::rgbLight(int r_value, int g_value, int b_value)
 {
-    digitalWrite(REDPIN, r_value);
+    analogWrite(REDPIN, r_value);
     digitalWrite(GREENPIN, g_value);
     digitalWrite(BLUEPIN, b_value);
 
-    if (r_value != 0 && g_value != 0 && b_value != 0)
-    {
-        donnees.etat_LED = true;
-    }
-    else
-        donnees.etat_LED = false;
+    r_value != 0 ? dataActionneurs.etat_LED_rouge = true : dataActionneurs.etat_LED_rouge = false;
+    g_value != 0 ? dataActionneurs.etat_LED_verte = true : dataActionneurs.etat_LED_verte = false;
+    b_value != 0 ? dataActionneurs.etat_LED_bleue = true : dataActionneurs.etat_LED_bleue = false;
 }
 
 void Actionneurs::blinkLED(int nb, int loopTime)
 {
     int ledState = LOW;
-    unsigned long previousMillis = 0;
-    unsigned long currentMillis = 0;
     for (int i = 0; i < nb * 2; i++)
     {
-        currentMillis = millis();
-        if (currentMillis - previousMillis >= loopTime)
-        {
-            previousMillis = currentMillis;
-            donnees.etat_LED = !donnees.etat_LED;
-            ledState = !ledState;
-            rgbLight(ledState, ledState, ledState);
-        }
+        waitingLoop(loopTime);
+        ledState = !ledState;
+        rgbLight(ledState, ledState, ledState);
     }
 }
 
 void Actionneurs::fadingLed(int redLed, int greenLed, int blueLed)
 {
     int i;
-    int prevTime;
 
     for (i = 0; i < 255; i += 5)
     {
-        if (redLed == HIGH)
-        {
-            redLight(i);
-        }
-        else
-            redLight(LOW);
-        if (greenLed == HIGH)
-        {
-            blueLight(HIGH);
-        }
-        else
-            blueLight(LOW);
-
-        if (blueLed == HIGH)
-        {
-            greenLight(HIGH);
-        }
-        else
-            greenLight(LOW);
+        redLight(i);
+        greenLed == HIGH ? greenLight(HIGH) : greenLight(LOW);
+        blueLed == HIGH ? blueLight(HIGH) : blueLight(LOW);
 
         waitingLoop(TEMPO_MAJ_20mSEC);
     }
     for (i = 255; i > 0; i -= 5)
     {
-        if (redLed == HIGH)
-        {
-            redLight(i);
-        }
-        else
-            redLight(LOW);
-
-        if (greenLed == HIGH)
-        {
-            blueLight(HIGH);
-        }
-        else
-            blueLight(LOW);
-        if (blueLed == HIGH)
-        {
-            greenLight(HIGH);
-        }
-        else
-            greenLight(LOW);
+        redLight(i);
+        greenLed == HIGH ? greenLight(HIGH) : greenLight(LOW);
+        blueLed == HIGH ? blueLight(HIGH) : blueLight(LOW);
 
         waitingLoop(TEMPO_MAJ_20mSEC);
     }
@@ -231,22 +208,26 @@ void Actionneurs::processLED(int r_value, int g_value, int b_value)
     rgbLight(r_value, g_value, b_value);
 }
 
-void Actionneurs::processMotor(int indiceQAI)
+void Actionneurs::processMotor(int indexQAI)
 {
-    if (indiceQAI == QAI_rouge)
+    if (indexQAI == (int)QAI_rouge)
     {
         analogWrite(MOTOR_PIN, MAX_SPEED);
     }
-    else if (indiceQAI == QAI_bleuFonce)
+    else if (indexQAI == (int)QAI_bleuFonce)
     {
         analogWrite(MOTOR_PIN, INTER2_SPEED);
     }
-    else if (indiceQAI == QAI_bleuClair)
+    else if (indexQAI == (int)QAI_bleuClair)
     {
         analogWrite(MOTOR_PIN, INTER1_SPEED);
     }
-    else if (indiceQAI == QAI_vert)
+    else if (indexQAI == (int)QAI_vert)
     {
         analogWrite(MOTOR_PIN, MIN_SPEED);
+    }
+    else
+    {
+        digitalWrite(MOTOR_PIN, LOW);
     }
 }

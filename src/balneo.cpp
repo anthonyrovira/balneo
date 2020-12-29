@@ -21,6 +21,9 @@ void setup();
 void loop();
 int cloud_reset(String command);
 int state_QAI(String command);
+int redLightToggle(String command);
+int greenLightToggle(String command);
+int blueLightToggle(String command);
 bool particleConnect();
 bool particleProcess();
 #line 15 "d:/antho/Documents/Programmation/Particle/balneo/src/balneo.ino"
@@ -62,6 +65,13 @@ byte lastState = 10;
 
 void setup()
 {
+  /* Fonctions Particle cloud */
+  Particle.function("Reset", cloud_reset);
+  Particle.function("QAI", state_QAI);
+  Particle.function("RedLight", redLightToggle);
+  Particle.function("GreenLight", greenLightToggle);
+  Particle.function("BlueLight", blueLightToggle);
+
   /* Variables Particle cloud */
   Particle.variable("temperature", _temperature);
   Particle.variable("humidity", _humidity);
@@ -71,21 +81,19 @@ void setup()
   Particle.variable("dureePresence", _dureePresence);
   Particle.variable("dureeChgtQAI", _dureeChgtQAI);
 
-  /* Fonctions Particle cloud */
-  Particle.function("Reset", cloud_reset);
-  Particle.function("QAI", state_QAI);
-
   particleConnect();
 
   Particle.publish("info", "Balneo version " + String(VERSION), PRIVATE);
 
   capteurs.begin();        // initialisation des capteurs
   capteurs.donnees.init(); // initialisation des donnees des capteurs
+  pinMode(MOTOR_PIN, OUTPUT);
 
   actionneurs.begin();                     // initialisation des actionneurs
   actionneurs.blinkLED(5, TEMPO_MAJ_1SEC); // Clignotement de LED pour vérifier que les actionneurs fonctionnent
 
   Particle.publish("info", "Setup completed", PRIVATE);
+  analogWrite(MOTOR_PIN, MAX_SPEED);
 }
 
 void loop()
@@ -113,7 +121,10 @@ void loop()
     if (millis() - timing.derniereMAJ_24H >= TEMPO_MAJ_24H)
     {
       capteurs.RAZNbPresence();
+      timing.derniereMAJ_24H = millis();
     }
+
+    //actionneurs.processMotor(4);
 
     if (capteurs.processPresence())
     {
@@ -125,9 +136,9 @@ void loop()
     else
     {
       actionneurs.standby();
-      actionneurs.fadingLed(HIGH, HIGH, HIGH);
-      actionneurs.fadingLed(HIGH, HIGH, LOW);
-      actionneurs.fadingLed(HIGH, LOW, HIGH);
+      actionneurs.fadingLed(ON, ON, ON);
+      actionneurs.fadingLed(ON, ON, OFF);
+      actionneurs.fadingLed(ON, OFF, ON);
     }
 
     break;
@@ -159,14 +170,15 @@ void loop()
   case PROCESS:
     capteurs.evaluateAirQuality();
     capteurs.processPresence();
+    //Particle.publish("info", "news data available", PRIVATE);
 
     etat = COMMANDE;
     break;
 
   //**************************************************
   case COMMANDE:
-    actionneurs.processMotor(capteurs.donnees.indiceQAI);
-
+    //actionneurs.processMotor(4);
+    analogWrite(MOTOR_PIN, INTER1_SPEED);
     etat = PUBLISH;
     break;
 
@@ -179,6 +191,7 @@ void loop()
     _nbPresence = capteurs.donnees.nbPresence;
     _dureePresence = (int)capteurs.timingCapteurs.dureePresence;
     _dureeChgtQAI = (int)capteurs.timingCapteurs.dureeChgtQAI;
+    //Particle.publish("info", "news data available", PRIVATE);
 
     etat = IDLE;
     break;
@@ -192,7 +205,7 @@ void loop()
   case RECONNECT:
 
     capteurs.donnees.etat_connexion = particleConnect();
-    capteurs.donnees.etat_connexion ? Particle.publish("reconnect", "connection is back", PRIVATE) : Particle.publish("reconnect", "reconnection failed", PRIVATE);
+    //capteurs.donnees.etat_connexion ? Particle.publish("reconnect", "connection is back", PRIVATE) : Particle.publish("reconnect", "reconnection failed", PRIVATE);
 
     etat = IDLE;
     break;
@@ -217,8 +230,10 @@ int cloud_reset(String command)
   // look for the matching argument "reset" <-- max of 64 characters long
   if (command.toLowerCase() == "reset" || command == "1" || command.toLowerCase() == "ok")
   {
-    etat = SYSTEM_RESET;
+    System.reset();
+    return 1;
   }
+  return -1;
 }
 
 // Pour obtenir l'indice de QAI actuel
@@ -226,20 +241,66 @@ int state_QAI(String command)
 {
   if (command == "" || command == "1" || command.toLowerCase() == "ok")
   {
-    /*
-    int res=0;
-    if (capteurs.donnees.indiceQAI == QAI_error)
-    {
-      res = 0;
-    }
-    else if (capteurs.donnees.indiceQAI == QAI_vert)
-    {
-      res = 1;
-    }
-    */
-
     return capteurs.donnees.indiceQAI;
   }
+  return -1;
+}
+
+// Allumer/Eteindre la led Rouge
+int redLightToggle(String command)
+{
+  if (command == "" || command == "1" || command.toLowerCase() == "ok")
+  {
+    if (actionneurs.stateRedLight())
+    {
+      actionneurs.redLight(OFF);
+      return 0;
+    }
+    else
+    {
+      actionneurs.redLight(ON);
+      return 1;
+    }
+  }
+  return -1;
+}
+
+// Allumer/Eteindre la led verte
+int greenLightToggle(String command)
+{
+  if (command == "" || command == "1" || command.toLowerCase() == "ok")
+  {
+    if (actionneurs.stateGreenLight())
+    {
+      actionneurs.greenLight(OFF);
+      return 0;
+    }
+    else
+    {
+      actionneurs.greenLight(ON);
+      return 1;
+    }
+  }
+  return -1;
+}
+
+// Allumer/Eteindre la led bleue
+int blueLightToggle(String command)
+{
+  if (command == "" || command == "1" || command.toLowerCase() == "ok")
+  {
+    if (actionneurs.stateBlueLight())
+    {
+      actionneurs.blueLight(OFF);
+      return 0;
+    }
+    else
+    {
+      actionneurs.blueLight(ON);
+      return 1;
+    }
+  }
+  return -1;
 }
 
 // Procédure de connexion au cloud Particle

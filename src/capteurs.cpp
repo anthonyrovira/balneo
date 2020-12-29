@@ -14,7 +14,6 @@ bool Capteurs::begin()
     bool state = 1;
     Particle.publish("setup", "Sensor initialization", PRIVATE);
 
-    pinMode(MOTOR_PIN, OUTPUT);
     pinMode(DHT22_PIN, INPUT);
     pinMode(PIR_PIN, INPUT_PULLDOWN);
     //attachInterrupt(PIR_PIN, newPresence, RISING);
@@ -29,7 +28,7 @@ void Capteurs::waitingLoop(unsigned int timeInMs)
 {
     unsigned long previousTime = millis();
     bool waiting = false;
-    while (millis() - previousTime >= timeInMs)
+    while (millis() <= previousTime + timeInMs)
     {
         waiting = true;
     }
@@ -104,6 +103,7 @@ int Capteurs::counterNbPresence()
 // Remise à zéro du compteur de nombre de fronts montants du détecteur de présence
 void Capteurs::RAZNbPresence()
 {
+    Particle.publish("info", "24 hrs", PRIVATE);
     donnees.nbPresence = 0;
 }
 
@@ -132,7 +132,7 @@ bool Capteurs::processPresence()
 {
     if (donnees.presence == HIGH)
     {
-        if (donnees.lastPresence != donnees.presence)
+        if (donnees.lastPresence != donnees.presence && donnees.lastPresence != -1)
         {
             donnees.lastPresence = donnees.presence;
             donnees.nbPresence++;
@@ -166,9 +166,9 @@ void Capteurs::evaluateAirQuality()
             timingCapteurs.dureeChgtQAI = ((millis() - timingCapteurs.dernierChgtQAI) / 1000) / 60;
             timingCapteurs.dernierChgtQAI = millis();
         }
-        r_capteurs = HIGH;
-        g_capteurs = LOW;
-        b_capteurs = HIGH;
+        donnees.r_capteurs = HIGH;
+        donnees.g_capteurs = LOW;
+        donnees.b_capteurs = HIGH;
     }
     else
     {
@@ -182,9 +182,9 @@ void Capteurs::evaluateAirQuality()
                 timingCapteurs.dureeChgtQAI = ((millis() - timingCapteurs.dernierChgtQAI) / 1000) / 60;
                 timingCapteurs.dernierChgtQAI = millis();
             }
-            r_capteurs = HIGH;
-            g_capteurs = LOW;
-            b_capteurs = LOW;
+            donnees.r_capteurs = HIGH;
+            donnees.g_capteurs = LOW;
+            donnees.b_capteurs = LOW;
         }
         else if (((donnees.humidity > 65) && (donnees.humidity <= 75)) || ((donnees.co2 > 700) && (donnees.co2 <= 1400)))
         {
@@ -196,9 +196,9 @@ void Capteurs::evaluateAirQuality()
                 timingCapteurs.dureeChgtQAI = ((millis() - timingCapteurs.dernierChgtQAI) / 1000) / 60;
                 timingCapteurs.dernierChgtQAI = millis();
             }
-            r_capteurs = LOW;
-            g_capteurs = LOW;
-            b_capteurs = HIGH;
+            donnees.r_capteurs = LOW;
+            donnees.g_capteurs = LOW;
+            donnees.b_capteurs = HIGH;
         }
         else if (((donnees.humidity > 65) && (donnees.humidity <= 75)) || ((donnees.co2 > 700) && (donnees.co2 <= 1400)))
         {
@@ -210,9 +210,9 @@ void Capteurs::evaluateAirQuality()
                 timingCapteurs.dureeChgtQAI = ((millis() - timingCapteurs.dernierChgtQAI) / 1000) / 60;
                 timingCapteurs.dernierChgtQAI = millis();
             }
-            r_capteurs = LOW;
-            g_capteurs = HIGH;
-            b_capteurs = HIGH;
+            donnees.r_capteurs = LOW;
+            donnees.g_capteurs = HIGH;
+            donnees.b_capteurs = HIGH;
         }
         else if ((donnees.humidity <= 65) && (donnees.co2 <= 700))
         {
@@ -224,9 +224,9 @@ void Capteurs::evaluateAirQuality()
                 timingCapteurs.dureeChgtQAI = ((millis() - timingCapteurs.dernierChgtQAI) / 1000) / 60;
                 timingCapteurs.dernierChgtQAI = millis();
             }
-            r_capteurs = LOW;
-            g_capteurs = HIGH;
-            b_capteurs = LOW;
+            donnees.r_capteurs = LOW;
+            donnees.g_capteurs = HIGH;
+            donnees.b_capteurs = LOW;
         }
     }
     donnees.lastIndiceQAI = donnees.indiceQAI;

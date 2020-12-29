@@ -6,7 +6,7 @@
 #include "Timing.h"
 
 //  Définition de la version
-#define VERSION "2.0"
+#define VERSION "2.1"
 
 /********************************************************************
  * Variables liées à la board
@@ -48,6 +48,12 @@
 #define INTER2_SPEED 170
 #define INTER1_SPEED 95
 #define MIN_SPEED 20
+
+/********************************************************************
+ * Variables définissant l'état des LED
+********************************************************************/
+#define ON 255
+#define OFF 0
 
 /********************************************************************
  * Variables globales
@@ -92,7 +98,7 @@ struct Donnees
 {
     IndiceHR indiceHR;
     IndiceCO2 indiceCo2;
-    IndiceQAI indiceQAI;
+    //IndiceQAI indiceQAI;
 
 public:
     // mesures
@@ -101,9 +107,15 @@ public:
     int co2;                    // Mesure de CO² en ppm
     volatile int presence;      // Présence d'une personne dans la pièce (0 ou 1)
     volatile int lastPresence;  // Indicateur de comparaison pour savoir s'il s'agit réellement d'une nouvelle présence
-    volatile int lastIndiceQAI; // Indicateur de comparaison pour la qaulité d'air
+    volatile int indiceQAI;     // Indice numérique de la qualité d'air
+    volatile int lastIndiceQAI; // Indicateur de comparaison pour la qualité d'air
     volatile int nbPresence;    // Intensité des mouvement dans la pièce (entier >0)
-    bool etat_LED;              // Etat de la LED
+    int r_capteurs;             // Couleur rouge de la led
+    int g_capteurs;             // Couleur verte de la led
+    int b_capteurs;             // Couleur bleue de la led
+    bool etat_LED_rouge;        // Etat de la LED rouge
+    bool etat_LED_verte;        // Etat de la LED verte
+    bool etat_LED_bleue;        // Etat de la LED bleue
     bool etat_connexion;        // Etat de la connexion du Particle
 
     int statut; // Etat des capteurs (0 = OK ou 1 = Erreur)
@@ -119,9 +131,15 @@ public:
         co2 = -1;           // Mesure de CO² en ppm
         presence = -1;      // Présence d'une personne dans la pièce (0 ou 1)
         lastPresence = -1;
+        indiceQAI = -1;
         lastIndiceQAI = -1;
-        nbPresence = -1;        // Intensité des mouvement dans la pièce (entier >0)
-        etat_LED = false;       // Etat de la LED
+        nbPresence = 0; // Intensité des mouvement dans la pièce (entier >0)
+        r_capteurs = LOW;
+        g_capteurs = LOW;
+        b_capteurs = LOW;
+        etat_LED_rouge = false; // Etat de la LED rouge
+        etat_LED_verte = false; // Etat de la LED verte
+        etat_LED_bleue = false; // Etat de la LED bleue
         etat_connexion = false; // Etat de la connexion du Particle
 
         statut = -1; // Etat des capteurs (0 = OK ou 1 = Erreur)
@@ -135,11 +153,17 @@ public:
         humidity = 0.0;    // Mesure d'humidité relative en %
         temperature = 0.0; // Mesure de température en °C
         co2 = 0;           // Mesure de CO² en ppm
-        presence = LOW;    // Présence d'une personne dans la pièce (0 ou 1)
-        lastPresence = LOW;
+        presence = 0;      // Présence d'une personne dans la pièce (0 ou 1)
+        lastPresence = 0;
+        indiceQAI = -1;
         lastIndiceQAI = -1;
-        nbPresence = 0;         // Intensité des mouvement dans la pièce (entier >0)
-        etat_LED = false;       // Etat de la LED
+        nbPresence = 0; // Intensité des mouvement dans la pièce (entier >0)
+        r_capteurs = LOW;
+        g_capteurs = LOW;
+        b_capteurs = LOW;
+        etat_LED_rouge = false; // Etat de la LED rouge
+        etat_LED_verte = false; // Etat de la LED verte
+        etat_LED_bleue = false; // Etat de la LED bleue
         etat_connexion = false; // Etat de la connexion du Particle
 
         statut = 0; // Etat des capteurs (0 = OK ou 1 = Erreur)

@@ -5,7 +5,6 @@
 #include <Wire.h>
 #include "Variables.h"
 #include "Timing.h"
-#include "Actionneurs.h"
 #include "MH-Z19B-CO2-Sensor-Serial.h"
 #include "PietteTech_DHT.h"
 #include "math.h"
@@ -32,9 +31,6 @@ public:
     void newPresence();
     int counterNbPresence(); //Compteur de présence dans la pièce
     void RAZNbPresence();    // Remise à zéro du compteur de nombre de fronts montant du détecteur de présence
-    int r_capteurs;          // Couleur rouge de la led
-    int g_capteurs;          // Couleur verte de la led
-    int b_capteurs;          // Couleur bleue de la led
 
     /* Prise de mesures */
     bool MAJCapteurs(); // Lancer toutes les méthodes précédentes en même temps
