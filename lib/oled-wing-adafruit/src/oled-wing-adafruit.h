@@ -20,7 +20,7 @@ public:
 	 * Buttons A and B conflict with the Ethernet FeatherWing, so if you are using both
 	 * wings pass USE_BUTTON_C so only button C will be used.
 	 */
-	OledWingAdafruit(/*int useButtons = USE_BUTTON_ALL*/);
+	OledWingAdafruit(int useButtons = USE_BUTTON_ALL);
 	virtual ~OledWingAdafruit();
 
 	/**
@@ -36,16 +36,19 @@ public:
 	/**
 	 * @brief Returns true if button A was enabled and pressed (with debouncing)
 	 */
+	/*
 	bool pressedA();
 
 	/**
 	 * @brief Returns true if button B was enabled and pressed (with debouncing)
 	 */
+	/*
 	bool pressedB();
 
 	/**
 	 * @brief Returns true if button C was enabled and pressed (with debouncing)
 	 */
+	/*
 	bool pressedC();
 
 	/**
@@ -69,21 +72,26 @@ public:
 	 */
 	void unlock() { os_mutex_unlock(mutex); };
 
-	//static const int USE_BUTTON_A 	= 0b001;
-	//static const int USE_BUTTON_B 	= 0b010;
-	//static const int USE_BUTTON_C 	= 0b100;
-	//static const int USE_BUTTON_ALL = 0b111;
+	static const int USE_BUTTON_ALL = 0b000;
 
-	//static const int BUTTON_A_PIN = D4;
-	//static const int BUTTON_B_PIN = D3;
-	//static const int BUTTON_C_PIN = D2;
+	/*
+	static const int USE_BUTTON_A 	= 0b001;
+	static const int USE_BUTTON_B 	= 0b010;
+	static const int USE_BUTTON_C 	= 0b100;
+	static const int USE_BUTTON_ALL = 0b111;
 
+	static const int BUTTON_A_PIN = D4;
+	static const int BUTTON_B_PIN = D3;
+	static const int BUTTON_C_PIN = D2;
+*/
 private:
 	os_mutex_t mutex = 0;
 	int useButtons;
-	//Debounce buttonA;
-	//Debounce buttonB;
-	//Debounce buttonC;
+	/*
+	Debounce buttonA;
+	Debounce buttonB;
+	Debounce buttonC;
+	*/
 };
 
 #endif /* __OLED_WING_ADAFRUIT_H */

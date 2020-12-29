@@ -63,7 +63,7 @@ public:
         derniereMAJ_1H = millis();
         derniereMAJ_24H = millis();
         dernierRedemarrage = millis();
-        dernierChgtQAI = millis();
+        dernierChgtQAI = 0;
         debutPresence = millis();
         finPresence = millis();
         dureePresence = 0;

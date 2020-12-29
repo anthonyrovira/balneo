@@ -119,9 +119,9 @@ void loop()
     else
     {
       actionneurs.standby();
-      actionneurs.fadingLed(ON, ON, ON);
-      actionneurs.fadingLed(ON, ON, OFF);
-      actionneurs.fadingLed(ON, OFF, ON);
+      actionneurs.fadingLed(HIGH, HIGH, HIGH);
+      actionneurs.fadingLed(HIGH, HIGH, LOW);
+      actionneurs.fadingLed(HIGH, LOW, HIGH);
     }
 
     break;
@@ -236,12 +236,12 @@ int redLightToggle(String command)
   {
     if (actionneurs.stateRedLight())
     {
-      actionneurs.redLight(OFF);
+      actionneurs.redLight(LOW);
       return 0;
     }
     else
     {
-      actionneurs.redLight(ON);
+      actionneurs.redLight(HIGH);
       return 1;
     }
   }
@@ -255,12 +255,12 @@ int greenLightToggle(String command)
   {
     if (actionneurs.stateGreenLight())
     {
-      actionneurs.greenLight(OFF);
+      actionneurs.greenLight(LOW);
       return 0;
     }
     else
     {
-      actionneurs.greenLight(ON);
+      actionneurs.greenLight(HIGH);
       return 1;
     }
   }
@@ -274,12 +274,12 @@ int blueLightToggle(String command)
   {
     if (actionneurs.stateBlueLight())
     {
-      actionneurs.blueLight(OFF);
+      actionneurs.blueLight(LOW);
       return 0;
     }
     else
     {
-      actionneurs.blueLight(ON);
+      actionneurs.blueLight(HIGH);
       return 1;
     }
   }

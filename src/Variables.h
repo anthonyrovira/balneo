@@ -47,7 +47,7 @@
 #define MAX_SPEED 214
 #define INTER2_SPEED 170
 #define INTER1_SPEED 95
-#define MIN_SPEED 200
+#define MIN_SPEED 20
 
 /********************************************************************
  * Variables définissant l'état des LED
@@ -134,9 +134,9 @@ public:
         indiceQAI = -1;
         lastIndiceQAI = -1;
         nbPresence = 0; // Intensité des mouvement dans la pièce (entier >0)
-        r_capteurs = OFF;
-        g_capteurs = OFF;
-        b_capteurs = OFF;
+        r_capteurs = LOW;
+        g_capteurs = LOW;
+        b_capteurs = LOW;
         etat_LED_rouge = false; // Etat de la LED rouge
         etat_LED_verte = false; // Etat de la LED verte
         etat_LED_bleue = false; // Etat de la LED bleue
@@ -153,14 +153,14 @@ public:
         humidity = 0.0;    // Mesure d'humidité relative en %
         temperature = 0.0; // Mesure de température en °C
         co2 = 0;           // Mesure de CO² en ppm
-        presence = LOW;    // Présence d'une personne dans la pièce (0 ou 1)
-        lastPresence = LOW;
+        presence = 0;      // Présence d'une personne dans la pièce (0 ou 1)
+        lastPresence = 0;
         indiceQAI = -1;
         lastIndiceQAI = -1;
         nbPresence = 0; // Intensité des mouvement dans la pièce (entier >0)
-        r_capteurs = OFF;
-        g_capteurs = OFF;
-        b_capteurs = OFF;
+        r_capteurs = LOW;
+        g_capteurs = LOW;
+        b_capteurs = LOW;
         etat_LED_rouge = false; // Etat de la LED rouge
         etat_LED_verte = false; // Etat de la LED verte
         etat_LED_bleue = false; // Etat de la LED bleue

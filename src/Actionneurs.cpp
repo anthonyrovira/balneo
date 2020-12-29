@@ -188,16 +188,16 @@ void Actionneurs::fadingLed(int redLed, int greenLed, int blueLed)
     for (i = 0; i < 255; i += 5)
     {
         redLight(i);
-        greenLed == ON ? greenLight(ON) : greenLight(OFF);
-        blueLed == ON ? blueLight(ON) : blueLight(OFF);
+        greenLed == HIGH ? greenLight(HIGH) : greenLight(LOW);
+        blueLed == HIGH ? blueLight(HIGH) : blueLight(LOW);
 
         waitingLoop(TEMPO_MAJ_20mSEC);
     }
     for (i = 255; i > 0; i -= 5)
     {
         redLight(i);
-        greenLed == ON ? greenLight(ON) : greenLight(OFF);
-        blueLed == ON ? blueLight(ON) : blueLight(OFF);
+        greenLed == HIGH ? greenLight(HIGH) : greenLight(LOW);
+        blueLed == HIGH ? blueLight(HIGH) : blueLight(LOW);
 
         waitingLoop(TEMPO_MAJ_20mSEC);
     }
@@ -210,29 +210,24 @@ void Actionneurs::processLED(int r_value, int g_value, int b_value)
 
 void Actionneurs::processMotor(int indexQAI)
 {
-    if (indexQAI == 4)
+    if (indexQAI == (int)QAI_rouge)
     {
         analogWrite(MOTOR_PIN, MAX_SPEED);
-        Particle.publish("motor", "Max", PRIVATE);
     }
-    else if (indexQAI == 3)
+    else if (indexQAI == (int)QAI_bleuFonce)
     {
         analogWrite(MOTOR_PIN, INTER2_SPEED);
-        Particle.publish("motor", "Inter2", PRIVATE);
     }
-    else if (indexQAI == 2)
+    else if (indexQAI == (int)QAI_bleuClair)
     {
         analogWrite(MOTOR_PIN, INTER1_SPEED);
-        Particle.publish("motor", "Inter1", PRIVATE);
     }
-    else if (indexQAI == 1)
+    else if (indexQAI == (int)QAI_vert)
     {
         analogWrite(MOTOR_PIN, MIN_SPEED);
-        Particle.publish("motor", "Min", PRIVATE);
     }
     else
     {
-        digitalWrite(MOTOR_PIN, OFF);
-        Particle.publish("motor", "OFF", PRIVATE);
+        digitalWrite(MOTOR_PIN, LOW);
     }
 }
