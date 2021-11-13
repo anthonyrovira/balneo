@@ -186,7 +186,7 @@ void Capteurs::evaluateAirQuality()
             donnees.g_capteurs = LOW;
             donnees.b_capteurs = LOW;
         }
-        else if (((donnees.humidity > 65) && (donnees.humidity <= 75)) || ((donnees.co2 > 700) && (donnees.co2 <= 1400)))
+        else if (((donnees.humidity > 75) && (donnees.humidity <= 85)) || ((donnees.co2 > 1400) && (donnees.co2 <= 2000)))
         {
             donnees.indiceQAI = QAI_bleuFonce;
             if (donnees.lastIndiceQAI != donnees.indiceQAI)
