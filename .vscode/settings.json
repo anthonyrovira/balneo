@@ -4,10 +4,6 @@
   "particle.targetDevice": "3d005f000751373238323937",
   "particle.targetPlatform": "photon",
   "C_Cpp.errorSquiggles": "EnabledIfIncludesResolve",
-  "particle.firmwareVersion": "2.0.1",
-  "cSpell.enableFiletypes": [
-    "!cpp",
-    "!markdown",
-    "!plaintext"
-  ]
+  "particle.firmwareVersion": "3.1.0",
+  "cSpell.enabled": false
 }
