@@ -124,6 +124,11 @@ void loop()
   Serial.print("Dew Point Slow (oC): ");
   Serial.println(DHT.getDewPointSlow());
 
+  Serial.print("Heat Index (oC) / (oF): ");
+  Serial.print(DHT.getHeatIndex());
+  Serial.print(" / ");
+  Serial.println(DHT.CtoF(DHT.getHeatIndex()));
+
   n++;
   delay(2500);
 }
