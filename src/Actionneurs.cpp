@@ -1,4 +1,5 @@
 #include "Actionneurs.h"
+#include "Timing.h"
 
 OledWingAdafruit display;
 
@@ -6,7 +7,7 @@ enum Etat_MENU
 {
     MENU_temp = 0, // Affichage des données de température
     MENU_hr = 10,  // Affichage des données d'humidité relative
-    MENU_co2 = 20  // Affichage des données de co2
+    MENU_co2 = 20  // Affichage des données de CO2
 };
 Etat_MENU etat_MENU = MENU_temp;
 
@@ -30,20 +31,9 @@ void Actionneurs::begin()
     display.display();
 }
 
-void Actionneurs::waitingLoop(unsigned int timeInMs)
-{
-    unsigned long previousTime = millis();
-    bool waiting = false;
-    while (millis() <= previousTime + timeInMs)
-    {
-        waiting = true;
-    }
-    waiting = false;
-}
-
 void Actionneurs::standby()
 {
-    //Particle.publish("IHM", "Switched-off", PRIVATE);
+    // Particle.publish("IHM", "Switched-off", PRIVATE);
 
     // Effacement de l'affichage
     display.clearDisplay();
@@ -63,7 +53,7 @@ void Actionneurs::displayTemp(float temperature)
     display.println(F(" C"));
     display.display();
 
-    waitingLoop(TEMPO_MAJ_10SEC);
+    timingActionneurs.waitingLoop(TEMPO_MAJ_10SEC);
 }
 
 void Actionneurs::displayHr(float humidity)
@@ -85,13 +75,12 @@ void Actionneurs::displayHr(float humidity)
     display.drawCircle(display.width() - 4, display.height() - 4, 3, WHITE);
     display.display();
 
-    waitingLoop(TEMPO_MAJ_10SEC);
+    timingActionneurs.waitingLoop(TEMPO_MAJ_10SEC);
 }
 
 void Actionneurs::displayCo2(int co2)
 {
     display.clearDisplay();
-
     display.setTextSize(1);
     display.setTextColor(WHITE);
     display.setCursor(0, 0);
@@ -101,19 +90,13 @@ void Actionneurs::displayCo2(int co2)
     display.println(F("ppm"));
     display.display();
 
-    waitingLoop(TEMPO_MAJ_10SEC);
+    timingActionneurs.waitingLoop(TEMPO_MAJ_10SEC);
 }
 
 void Actionneurs::redLight(int r_value)
 {
     analogWrite(REDPIN, r_value);
-
-    if (r_value != 0)
-    {
-        dataActionneurs.etat_LED_rouge = true;
-    }
-    else
-        dataActionneurs.etat_LED_rouge = false;
+    dataActionneurs.etat_LED_rouge = r_value != 0;
 }
 
 void Actionneurs::greenLight(int g_value)
@@ -121,13 +104,7 @@ void Actionneurs::greenLight(int g_value)
     g_value >= 1 ? g_value = HIGH : g_value = LOW;
 
     digitalWrite(GREENPIN, g_value);
-
-    if (g_value != 0)
-    {
-        dataActionneurs.etat_LED_verte = true;
-    }
-    else
-        dataActionneurs.etat_LED_verte = false;
+    dataActionneurs.etat_LED_verte = g_value != 0;
 }
 
 void Actionneurs::blueLight(int b_value)
@@ -135,13 +112,7 @@ void Actionneurs::blueLight(int b_value)
     b_value >= 1 ? b_value = HIGH : b_value = LOW;
 
     digitalWrite(BLUEPIN, b_value);
-
-    if (b_value != 0)
-    {
-        dataActionneurs.etat_LED_bleue = true;
-    }
-    else
-        dataActionneurs.etat_LED_bleue = false;
+    dataActionneurs.etat_LED_bleue = b_value != 0;
 }
 
 bool Actionneurs::stateRedLight()
@@ -175,7 +146,7 @@ void Actionneurs::blinkLED(int nb, int loopTime)
     int ledState = LOW;
     for (int i = 0; i < nb * 2; i++)
     {
-        waitingLoop(loopTime);
+        timingActionneurs.waitingLoop(loopTime);
         ledState = !ledState;
         rgbLight(ledState, ledState, ledState);
     }
@@ -191,7 +162,7 @@ void Actionneurs::fadingLed(int redLed, int greenLed, int blueLed)
         greenLed == HIGH ? greenLight(HIGH) : greenLight(LOW);
         blueLed == HIGH ? blueLight(HIGH) : blueLight(LOW);
 
-        waitingLoop(TEMPO_MAJ_20mSEC);
+        timingActionneurs.waitingLoop(TEMPO_MAJ_20mSEC);
     }
     for (i = 255; i > 0; i -= 5)
     {
@@ -199,7 +170,7 @@ void Actionneurs::fadingLed(int redLed, int greenLed, int blueLed)
         greenLed == HIGH ? greenLight(HIGH) : greenLight(LOW);
         blueLed == HIGH ? blueLight(HIGH) : blueLight(LOW);
 
-        waitingLoop(TEMPO_MAJ_20mSEC);
+        timingActionneurs.waitingLoop(TEMPO_MAJ_20mSEC);
     }
 }
 

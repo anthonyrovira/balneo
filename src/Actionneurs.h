@@ -10,7 +10,6 @@
 #include "Variables.h"
 #include "Timing.h"
 
-///////////////////////////////////////////////////////////////////////////////////////////////
 // définition de la classe affichage
 class Actionneurs
 {
@@ -45,8 +44,6 @@ public:
     void processMotor(int);
 
 private:
-    // Waiting function
-    void waitingLoop(unsigned int);
 };
 
 #endif

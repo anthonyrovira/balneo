@@ -3,5 +3,8 @@
   "particle.targetDevice": "3d005f000751373238323937",
   "particle.targetPlatform": "photon",
   "C_Cpp.errorSquiggles": "enabledIfIncludesResolve",
-  "particle.firmwareVersion": "3.3.1"
+  "particle.firmwareVersion": "3.3.1",
+  "files.associations": {
+    "cmath": "cpp"
+  }
 }
