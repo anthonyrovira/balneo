@@ -19,6 +19,12 @@
 //      November 2019       Incorporate workaround for SOS+14 bug
 //                          https://github.com/eliteio/PietteTech_DHT/issues/1
 // 
+//      September 2021      Merged PR 
+//                          https://github.com/eliteio/PietteTech_DHT/pull/4
+// 
+//      November 2021       Added calculation for HeatIndex and 
+//                          conversion CtoF() and FtoC()
+//
 // Based on adaptation by niesteszeck (github/niesteszeck)
 // Based on original DHT11 library (http://playgroudn.adruino.cc/Main/DHT11Lib)
 // 
@@ -35,7 +41,7 @@
 #include <Particle.h>
 #include <math.h>
 
-const char DHTLIB_VERSION[]              = "0.0.12";
+const char DHTLIB_VERSION[]              = "0.0.14";
 
 // device types
 const int  DHT11                         = 11;
@@ -90,48 +96,63 @@ public:
   // NOTE:  isrCallback is only here for backwards compatibility with v0.3 and earlier
   //        it is no longer used or needed
   // 
-  void isrCallback();
-  int acquire();
-  int acquireAndWait(uint32_t timeout = 0);
-  float getCelsius();
-  float getFahrenheit();
-  float getKelvin();
-  double getDewPoint();
-  double getDewPointSlow();
-  float getHumidity();
-  bool acquiring();
-  int getStatus();
-  float readTemperature();
-  float readHumidity();
+  void     isrCallback();
+  int      acquire();
+  int      acquireAndWait(uint32_t timeout = 0);
+  static inline
+  double   CtoF(double celsius)    { return (celsius * 9 / 5 + 32); };
+  static inline 
+  double   FtoC(double fahrenheit) { return ((fahrenheit - 32) * 5 / 9); };
+  float    getCelsius();
+  float    getFahrenheit();
+  float    getKelvin();
+  double   getDewPoint();
+  double   getDewPointSlow();
+  double   getHeatIndex();
+  float    getHumidity();
+  bool     acquiring();
+  int      getStatus();
+  float    readTemperature();
+  float    readHumidity();
 #if defined(DHT_DEBUG_TIMING)
-  volatile uint8_t _edges[41];
+  volatile 
+  uint8_t  _edges[41];
 #endif
 
 private:
-  void _isrCallback();
-  void convert();
+  void     _isrCallback();
+  void     convert();
 #if (SYSTEM_VERSION < SYSTEM_VERSION_v121RC3)
   // no extra steps required
 #else
-  void detachISRIfRequested();           
-  volatile bool _detachISR;
+  void     detachISRIfRequested();           
+  volatile 
+  bool     _detachISR;
 #endif
   enum states { RESPONSE = 0, DATA = 1, ACQUIRED = 2, STOPPED = 3, ACQUIRING = 4 };
-  volatile states _state;
-  volatile int _status;
-  volatile uint8_t _bits[5];
-  volatile uint8_t _cnt;
-  volatile uint8_t _idx;
-  volatile unsigned long _us;
-  volatile bool _convert;
+  volatile 
+  states   _state;
+  volatile 
+  int      _status;
+  volatile 
+  uint8_t  _bits[5];
+  volatile 
+  uint8_t  _cnt;
+  volatile 
+  uint8_t  _idx;
+  volatile 
+  uint32_t _us;
+  volatile 
+  bool     _convert;
 #if defined(DHT_DEBUG_TIMING)
-  volatile uint8_t *_e;
+  volatile 
+  uint8_t *_e;
 #endif
-  int _sigPin;
-  int _type;
-  unsigned long _lastreadtime;
-  bool _firstreading;
-  float _hum;
-  float _temp;
+  int      _sigPin;
+  int      _type;
+  uint32_t _lastreadtime;
+  bool     _firstreading;
+  float    _hum;
+  float    _temp;
 };
 #endif

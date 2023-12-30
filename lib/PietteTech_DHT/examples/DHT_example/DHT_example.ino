@@ -115,13 +115,17 @@ void loop()
         break;
     }
 
-    Serial.printlnf("Humidity (%): %.2f", DHT.getHumidity());
-    Serial.printlnf("Temperature (oC): %.2f", DHT.getCelsius());
-    Serial.printlnf("Temperature (oF): %.2f", DHT.getFahrenheit());
-    Serial.printlnf("Temperature (K): %.2f", DHT.getKelvin());
-    Serial.printlnf("Dew Point (oC): %.2f", DHT.getDewPoint());
-    Serial.printlnf("Dew Point Slow (oC): %.2f", DHT.getDewPointSlow());
-
+    Serial.printlnf("Humidity      : %5.2f %%", DHT.getHumidity());
+    Serial.printlnf("Temperature   : %5.2f °C", DHT.getCelsius());
+    Serial.printlnf("Temperature   : %5.2f °F", DHT.getFahrenheit());
+    Serial.printlnf("Temperature   : %5.2f  K", DHT.getKelvin());
+    Serial.printlnf("Dew Point     : %5.2f °C", DHT.getDewPoint());
+    Serial.printlnf("Dew Point Slow: %5.2f °C", DHT.getDewPointSlow());
+    Serial.printlnf("Heat Index    : %5.2f °C\r\n"
+                    "                %5.2f °F\r\n"
+                   , DHT.getHeatIndex()
+                   , DHT.CtoF(DHT.getHeatIndex())
+                   );
     n++;  
     bDHTstarted = false;  // reset the sample flag so we can take another
     msLastSample = millis();

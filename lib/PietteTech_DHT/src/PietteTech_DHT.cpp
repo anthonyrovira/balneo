@@ -19,6 +19,12 @@
 //      November 2019       Incorporate workaround for SOS+14 bug
 //                          https://github.com/eliteio/PietteTech_DHT/issues/1
 // 
+//      September 2021      Merged PR 
+//                          https://github.com/eliteio/PietteTech_DHT/pull/4
+// 
+//      November 2021       Added calculation for HeatIndex and 
+//                          conversion CtoF() and FtoC()
+//
 // Based on adaptation by niesteszeck (github/niesteszeck)
 // Based on original DHT11 library (http://playgroudn.adruino.cc/Main/DHT11Lib)
 // 
@@ -168,9 +174,12 @@ int PietteTech_DHT::acquireAndWait(uint32_t timeout) {
   acquire();
   uint32_t start = millis();
   while (acquiring() && (timeout == 0 || ((millis() - start) < timeout))) Particle.process();
-  if (acquiring())
-  {
+  if (acquiring()) {
     _status = DHTLIB_ERROR_RESPONSE_TIMEOUT;
+    if (_state == RESPONSE) {
+      _state = STOPPED;
+      _detachISR = true;
+    }
   }
   return getStatus();
 }
@@ -339,7 +348,7 @@ float PietteTech_DHT::getHumidity() {
 
 float PietteTech_DHT::getFahrenheit() {
   DHT_CHECK_STATE;
-  return _temp * 9 / 5 + 32;
+  return CtoF(_temp);
 }
 
 float PietteTech_DHT::getKelvin() {
@@ -385,6 +394,19 @@ double PietteTech_DHT::getDewPointSlow() {
   double VP = pow(10, SUM - 3) * (double)_hum;
   double T = log(VP / 0.61078); // temp var
   return (241.88 * T) / (17.558 - T);
+}
+
+double PietteTech_DHT::getHeatIndex() {
+  DHT_CHECK_STATE;
+	return -8.78469475556 
+         +1.61139411      * (double)_temp 
+         +2.33854883889                           * (double)_hum 
+         -0.14611605      * (double)_temp         * (double)_hum 
+         -0.012308094     * pow((double)_temp, 2) 
+         -0.0164248277778                         * pow((double)_hum, 2) 
+         +0.002211732     * pow((double)_temp, 2) * (double)_hum 
+         +0.00072546      * (double)_temp         * pow((double)_hum, 2) 
+         -0.000003582     * pow((double)_temp, 2) * pow((double)_hum, 2);
 }
 
 #if (SYSTEM_VERSION < SYSTEM_VERSION_v121RC3)

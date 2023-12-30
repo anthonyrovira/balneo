@@ -147,6 +147,11 @@ void printSensorData(class PietteTech_DHT *_d) {
 
   Serial.print("Dew Point Slow (oC): ");
   Serial.println(_d->getDewPointSlow());
+
+  Serial.print("Heat Index (oC) / (oF): ");
+  Serial.print(_d->getHeatIndex());
+  Serial.print(" / ");
+  Serial.println(_d->CtoF(_d->getHeatIndex()));
 }
 
 void loop()

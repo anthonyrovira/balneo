@@ -5,7 +5,7 @@ MHZ19BCO2SensorSerial<USARTSerial> mhz19b(Serial1);
 
 Capteurs::Capteurs()
 {
-    //Initialisation des variables
+    // Initialisation des variables
 }
 
 // Initier la communication avec tous les capteurs
@@ -16,7 +16,7 @@ bool Capteurs::begin()
 
     pinMode(DHT22_PIN, INPUT);
     pinMode(PIR_PIN, INPUT_PULLDOWN);
-    //attachInterrupt(PIR_PIN, newPresence, RISING);
+    // attachInterrupt(PIR_PIN, newPresence, RISING);
 
     waitingLoop(100);
 
@@ -35,14 +35,14 @@ void Capteurs::waitingLoop(unsigned int timeInMs)
     waiting = false;
 }
 
-float Capteurs::arrondi(float number)
+float roundToHundredth(float number)
 {
     return (int)(number * pow(10, 2) + .5) / pow(10, 2);
 }
 
 float Capteurs::getTemperature()
 {
-    donnees.temperature = arrondi(dht.readTemperature());
+    donnees.temperature = roundToHundredth(dht.readTemperature());
 
     // On contrôle la cohérence des données
     if (isnan(donnees.temperature) || donnees.temperature <= 0)
@@ -57,7 +57,7 @@ float Capteurs::getTemperature()
 
 float Capteurs::getHumidity()
 {
-    donnees.humidity = arrondi(dht.readHumidity());
+    donnees.humidity = roundToHundredth(dht.readHumidity());
 
     // On contrôle la cohérence des données
     if (isnan(donnees.humidity) || donnees.humidity <= 0)
@@ -108,7 +108,7 @@ void Capteurs::RAZNbPresence()
 }
 
 // Mise à jour de tous les capteurs
-bool Capteurs::MAJCapteurs()
+bool Capteurs::updateSensors()
 {
     bool isOk = true;
     getTemperature();
@@ -158,76 +158,83 @@ void Capteurs::evaluateAirQuality()
 {
     if (donnees.temperature <= 0 || donnees.humidity <= 0 || donnees.co2 <= 0)
     {
-        donnees.indiceQAI = QAI_error;
-        if (donnees.lastIndiceQAI != donnees.indiceQAI)
-        {
-            donnees.lastIndiceQAI = donnees.indiceQAI;
-            Particle.publish("error", "Invalid data from sensors", PRIVATE);
-            timingCapteurs.dureeChgtQAI = ((millis() - timingCapteurs.dernierChgtQAI) / 1000) / 60;
-            timingCapteurs.dernierChgtQAI = millis();
-        }
-        donnees.r_capteurs = HIGH;
-        donnees.g_capteurs = LOW;
-        donnees.b_capteurs = HIGH;
+        handleInvalidData();
     }
     else
     {
-        if ((donnees.humidity > 85) || (donnees.co2 > 2000))
-        {
-            donnees.indiceQAI = QAI_rouge;
-            if (donnees.lastIndiceQAI != donnees.indiceQAI)
-            {
-                donnees.lastIndiceQAI = donnees.indiceQAI;
-                Particle.publish("newState", "red", PRIVATE);
-                timingCapteurs.dureeChgtQAI = ((millis() - timingCapteurs.dernierChgtQAI) / 1000) / 60;
-                timingCapteurs.dernierChgtQAI = millis();
-            }
-            donnees.r_capteurs = HIGH;
-            donnees.g_capteurs = LOW;
-            donnees.b_capteurs = LOW;
-        }
-        else if (((donnees.humidity > 75) && (donnees.humidity <= 85)) || ((donnees.co2 > 1400) && (donnees.co2 <= 2000)))
-        {
-            donnees.indiceQAI = QAI_bleuFonce;
-            if (donnees.lastIndiceQAI != donnees.indiceQAI)
-            {
-                donnees.lastIndiceQAI = donnees.indiceQAI;
-                Particle.publish("newState", "blue", PRIVATE);
-                timingCapteurs.dureeChgtQAI = ((millis() - timingCapteurs.dernierChgtQAI) / 1000) / 60;
-                timingCapteurs.dernierChgtQAI = millis();
-            }
-            donnees.r_capteurs = LOW;
-            donnees.g_capteurs = LOW;
-            donnees.b_capteurs = HIGH;
-        }
-        else if (((donnees.humidity > 65) && (donnees.humidity <= 75)) || ((donnees.co2 > 700) && (donnees.co2 <= 1400)))
-        {
-            donnees.indiceQAI = QAI_bleuClair;
-            if (donnees.lastIndiceQAI != donnees.indiceQAI)
-            {
-                donnees.lastIndiceQAI = donnees.indiceQAI;
-                Particle.publish("newState", "lightBlue", PRIVATE);
-                timingCapteurs.dureeChgtQAI = ((millis() - timingCapteurs.dernierChgtQAI) / 1000) / 60;
-                timingCapteurs.dernierChgtQAI = millis();
-            }
-            donnees.r_capteurs = LOW;
-            donnees.g_capteurs = HIGH;
-            donnees.b_capteurs = HIGH;
-        }
-        else if ((donnees.humidity <= 65) && (donnees.co2 <= 700))
-        {
-            donnees.indiceQAI = QAI_vert;
-            if (donnees.lastIndiceQAI != donnees.indiceQAI)
-            {
-                donnees.lastIndiceQAI = donnees.indiceQAI;
-                Particle.publish("newState", "green", PRIVATE);
-                timingCapteurs.dureeChgtQAI = ((millis() - timingCapteurs.dernierChgtQAI) / 1000) / 60;
-                timingCapteurs.dernierChgtQAI = millis();
-            }
-            donnees.r_capteurs = LOW;
-            donnees.g_capteurs = HIGH;
-            donnees.b_capteurs = LOW;
-        }
+        handleValidData();
+    }
+}
+
+void Capteurs::handleInvalidData()
+{
+    donnees.indiceQAI = QAI_error;
+    if (donnees.lastIndiceQAI != donnees.indiceQAI)
+    {
+        donnees.lastIndiceQAI = donnees.indiceQAI;
+        Particle.publish("error", "Invalid data from sensors", PRIVATE);
+        timingCapteurs.durationChgtQAI = ((millis() - timingCapteurs.lastChgtQAI) / 1000) / 60;
+        timingCapteurs.lastChgtQAI = millis();
+    }
+    setRGB(HIGH, LOW, HIGH);
+}
+
+void Capteurs::handleValidData()
+{
+    if (donnees.humidity > 85 || donnees.co2 > 2000)
+    {
+        handleQAIChangeAndPublish(QAI_rouge, HIGH, LOW, LOW, "red");
+    }
+    else if ((donnees.humidity > 75 && donnees.humidity <= 85) ||
+             (donnees.co2 > 1400 && donnees.co2 <= 2000))
+    {
+        handleQAIChangeAndPublish(QAI_bleuFonce, LOW, LOW, HIGH, "blue");
+    }
+    else if ((donnees.humidity > 65 && donnees.humidity <= 75) ||
+             (donnees.co2 > 700 && donnees.co2 <= 1400))
+    {
+        handleQAIChangeAndPublish(QAI_bleuClair, LOW, HIGH, HIGH, "lightBlue");
+    }
+    else if (donnees.humidity <= 65 && donnees.co2 <= 700)
+    {
+        handleQAIChangeAndPublish(QAI_vert, LOW, HIGH, LOW, "green");
     }
     donnees.lastIndiceQAI = donnees.indiceQAI;
+}
+
+void Capteurs::handleQAIChangeAndPublish(int newIndiceQAI, int r, int g, int b, const char *newState)
+{
+    donnees.indiceQAI = newIndiceQAI;
+    if (donnees.lastIndiceQAI != donnees.indiceQAI)
+    {
+        donnees.lastIndiceQAI = donnees.indiceQAI;
+        Particle.publish("newState", getStateString(newIndiceQAI), PRIVATE);
+        timingCapteurs.durationChgtQAI = ((millis() - timingCapteurs.lastChgtQAI) / 1000) / 60;
+        timingCapteurs.lastChgtQAI = millis();
+    }
+    setRGB(r, g, b);
+}
+
+const char *Capteurs::getStateString(int indiceQAI)
+{
+    switch (indiceQAI)
+    {
+    case QAI_rouge:
+        return "red";
+    case QAI_bleuFonce:
+        return "blue";
+    case QAI_bleuClair:
+        return "lightBlue";
+    case QAI_vert:
+        return "green";
+    default:
+        return "unknown";
+    }
+}
+
+void Capteurs::setRGB(int r, int g, int b)
+{
+    donnees.r_capteurs = r;
+    donnees.g_capteurs = g;
+    donnees.b_capteurs = b;
 }

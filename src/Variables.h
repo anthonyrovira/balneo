@@ -10,12 +10,12 @@
 
 /********************************************************************
  * Variables liées à la board
-********************************************************************/
+ ********************************************************************/
 #define VOLTAGE 3.3
 
 /********************************************************************
  * Réservation des Adresses EEPROM
-********************************************************************/
+ ********************************************************************/
 #define EEPROM_SIZE 64 // Taille en octets utilisés de l'EEPROM
 #define ADRESSE_DEBUT_EEPROM 0
 
@@ -29,7 +29,7 @@
 
 /********************************************************************
  * Variables servant à l'indice de qualité d'air
-********************************************************************/
+ ********************************************************************/
 // CO2
 #define CO2_ROUGE 2000
 #define CO2_BLEU_DARK 1400
@@ -43,7 +43,7 @@
 
 /********************************************************************
  * Variables définissant les vitesses du moteur
-********************************************************************/
+ ********************************************************************/
 #define MAX_SPEED 214
 #define INTER2_SPEED 170
 #define INTER1_SPEED 95
@@ -51,18 +51,18 @@
 
 /********************************************************************
  * Variables définissant l'état des LED
-********************************************************************/
+ ********************************************************************/
 #define ON 255
 #define OFF 0
 
 /********************************************************************
  * Variables globales
-********************************************************************/
-//size_t tailleEEPROM; // Returns the total number of bytes available in the emulated EEPROM
+ ********************************************************************/
+// size_t tailleEEPROM; // Returns the total number of bytes available in the emulated EEPROM
 
 /********************************************************************
  * Indices relatif aux données de qualité d'air
-********************************************************************/
+ ********************************************************************/
 enum IndiceHR
 {
     Air_tres_humide = 1,
@@ -91,14 +91,14 @@ enum IndiceQAI
 };
 
 /********************************************************************
- *  Définition de la structure "Donnees" qui regroupe toutes les données 
+ *  Définition de la structure "Donnees" qui regroupe toutes les données
  *  mesurées par les capteurs afin de les partager avec les autres fonctions du programme.
-********************************************************************/
+ ********************************************************************/
 struct Donnees
 {
     IndiceHR indiceHR;
     IndiceCO2 indiceCo2;
-    //IndiceQAI indiceQAI;
+    // IndiceQAI indiceQAI;
 
 public:
     // mesures
